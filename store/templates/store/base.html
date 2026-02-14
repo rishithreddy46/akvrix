@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AKVRIX — Premium Men's Streetwear{% endblock %}</title>
+    <meta name="description"
+        content="{% block description %}Premium men's streetwear. Bold identity, quality craftsmanship, and futuristic design.{% endblock %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body data-cart-count="{{ cart_count }}">
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-content">
+            <div class="loader-logo">AKVRIX</div>
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <button id="searchClose"><i class="ri-close-line"></i></button>
+        <div class="search-inner">
+            <input type="text" id="searchInput" placeholder="Search products...">
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Nav Overlay -->
+    <div class="nav-overlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar {% block nav_class %}{% endblock %}">
+        <a href="{% url 'home' %}" class="nav-logo">AKV<span>RIX</span></a>
+        <ul class="nav-menu">
+            <li><a href="{% url 'home' %}" {% if request.path == '/' %}class="active" {% endif %}>Home</a></li>
+            <li><a href="{% url 'shop' %}" {% if '/shop' in request.path %}class="active" {% endif %}>Shop</a></li>
+            <li><a href="{% url 'shop' %}?cat=streetwear">Streetwear</a></li>
+            <li><a href="{% url 'shop' %}?cat=outerwear">Outerwear</a></li>
+            <li><a href="{% url 'shop' %}?cat=new">New Drops</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button id="searchToggle"><i class="ri-search-line"></i></button>
+            <button id="darkModeToggle"><i class="ri-moon-line"></i></button>
+            <a href="{% url 'account' %}"><i class="ri-user-line"></i></a>
+            <a href="{% url 'cart' %}" style="position:relative"><i class="ri-shopping-bag-line"></i><span
+                    class="cart-count">{{ cart_count }}</span></a>
+            <button class="nav-toggle"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    {% block footer %}
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="{% url 'home' %}" class="nav-logo"
+                    style="display:inline-block;margin-bottom:.5rem">AKV<span>RIX</span></a>
+                <p>Premium men's streetwear brand. Bold identity, quality craftsmanship, and futuristic design for the
+                    modern man.</p>
+                <div class="footer-socials">
+                    <a href="#"><i class="ri-instagram-line"></i></a>
+                    <a href="#"><i class="ri-twitter-x-line"></i></a>
+                    <a href="#"><i class="ri-tiktok-line"></i></a>
+                    <a href="#"><i class="ri-youtube-line"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'shop' %}">Shop All</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Categories</h4>
+                <ul>
+                    <li><a href="{% url 'shop' %}?cat=streetwear">Streetwear</a></li>
+                    <li><a href="{% url 'shop' %}?cat=essentials">Essentials</a></li>
+                    <li><a href="{% url 'shop' %}?cat=outerwear">Outerwear</a></li>
+                    <li><a href="{% url 'shop' %}?cat=limited">Limited Edition</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="#">hello@akvrix.com</a></li>
+                    <li><a href="#">+91 98765 43210</a></li>
+                    <li><a href="#">Mumbai, India</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 AKVRIX. All rights reserved.</p>
+            <div class="payment-icons">
+                <i class="ri-visa-line"></i>
+                <i class="ri-mastercard-line"></i>
+                <i class="ri-paypal-line"></i>
+                <i class="ri-apple-line"></i>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Mobile Bottom Bar -->
+    <div class="mobile-bottom-bar">
+        <nav>
+            <a href="{% url 'home' %}" {% if request.path == '/' %}class="active" {% endif %}><i
+                    class="ri-home-line"></i>Home</a>
+            <a href="{% url 'shop' %}" {% if '/shop' in request.path %}class="active" {% endif %}><i
+                    class="ri-search-line"></i>Shop</a>
+            <a href="{% url 'cart' %}" {% if '/cart' in request.path %}class="active" {% endif %}><i
+                    class="ri-shopping-bag-line"></i>Cart</a>
+            <a href="{% url 'account' %}" {% if '/account' in request.path %}class="active" {% endif %}><i
+                    class="ri-user-line"></i>Account</a>
+        </nav>
+    </div>
+
+    {% csrf_token %}
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

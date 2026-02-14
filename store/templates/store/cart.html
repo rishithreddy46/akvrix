@@ -1,0 +1,102 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Cart — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Shopping Cart</h1>
+        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <span>Cart</span></div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        {% if items %}
+        <div class="cart-layout">
+            <div>
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr id="cart-item-{{ item.id }}">
+                            <td>
+                                <div class="cart-item-info">
+                                    <img src="{{ item.product.image }}" alt="{{ item.product.name }}">
+                                    <div>
+                                        <h4><a href="{% url 'product_detail' item.product.slug %}">{{ item.product.name
+                                                }}</a></h4>
+                                        <span>Size: {{ item.size }} &middot; Color: <span
+                                                style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ item.color }};vertical-align:middle"></span></span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-weight:600">₹{{ item.product.price }}</td>
+                            <td>
+                                <div class="qty-selector">
+                                    <button onclick="updateCartItem({{ item.id }}, 'decrease')"><i
+                                            class="ri-subtract-line"></i></button>
+                                    <input type="number" value="{{ item.quantity }}" readonly>
+                                    <button onclick="updateCartItem({{ item.id }}, 'increase')"><i
+                                            class="ri-add-line"></i></button>
+                                </div>
+                            </td>
+                            <td style="font-weight:600;color:var(--accent)">₹{{ item.total }}</td>
+                            <td><button class="cart-remove" onclick="updateCartItem({{ item.id }}, 'remove')"><i
+                                        class="ri-delete-bin-line"></i></button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-top:1.5rem"><a href="{% url 'shop' %}" class="btn btn-outline btn-sm"><i
+                            class="ri-arrow-left-line"></i> Continue Shopping</a></div>
+            </div>
+
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="coupon-input">
+                    <input type="text" placeholder="Coupon code" id="couponInput">
+                    <button onclick="showToast('Coupon applied: AKVRIX10','success')">Apply</button>
+                </div>
+                <div class="cart-summary-row"><span>Subtotal</span><span>₹{{ subtotal }}</span></div>
+                <div class="cart-summary-row"><span>Shipping</span><span>{% if shipping %}₹{{ shipping }}{% else %}<span
+                            style="color:var(--success)">Free</span>{% endif %}</span></div>
+                {% if subtotal > 0 and shipping > 0 %}
+                <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:.75rem">Free shipping on orders over
+                    ₹5,000</p>
+                {% endif %}
+                <div class="cart-summary-row total"><span>Total</span><span
+                        style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">₹{{
+                        total }}</span></div>
+                <a href="{% url 'checkout' %}" class="btn btn-primary btn-full btn-lg" style="margin-top:1rem">Checkout
+                    <i class="ri-arrow-right-line"></i></a>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="ri-shopping-bag-line"></i>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    async function updateCartItem(itemId, action) {
+        const r = await apiCall('/api/cart/update/', { item_id: itemId, action });
+        if (r.success) location.reload();
+    }
+</script>
+{% endblock %}

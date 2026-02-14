@@ -1,0 +1,196 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{
+                product.name }}</span></div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="product-detail">
+            <!-- Gallery -->
+            <div>
+                <div class="gallery-main" id="mainGallery">
+                    <img src="{{ product.image }}" alt="{{ product.name }}" id="mainImg">
+                </div>
+                <div class="gallery-thumbs">
+                    <img src="{{ product.image }}" alt="View 1" class="active" onclick="switchImg(this)">
+                    {% if product.image_hover %}
+                    <img src="{{ product.image_hover }}" alt="View 2" onclick="switchImg(this)">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="product-details">
+                {% if product.badge %}
+                <span class="product-badge {% if product.badge == 'Limited' %}limited{% endif %}"
+                    style="position:static;margin-bottom:1rem;display:inline-block">{{ product.badge }}</span>
+                {% endif %}
+                <h1>{{ product.name }}</h1>
+                <div class="price-block">
+                    <span class="current">₹{{ product.price }}</span>
+                    {% if product.old_price %}
+                    <span class="old">₹{{ product.old_price }}</span>
+                    <span class="save">Save {{ product.discount_percent }}%</span>
+                    {% endif %}
+                </div>
+                <div class="rating-block">
+                    <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                        class="ri-star-fill"></i>
+                    {% if product.rating >= 4.5 %}
+                    <i class="ri-star-fill"></i>
+                    {% else %}
+                    <i class="ri-star-half-fill"></i>
+                    {% endif %}
+                    <span>{{ product.rating }} ({{ product.reviews_count }} reviews)</span>
+                </div>
+                <p class="desc">{{ product.description }}</p>
+
+                <!-- Size Selector -->
+                <div class="selector-group">
+                    <label>Size</label>
+                    <div class="size-options" id="sizeOptions">
+                        {% for s in product.get_sizes_list %}
+                        <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}"
+                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{
+                            s }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Color Selector -->
+                <div class="selector-group">
+                    <label>Color</label>
+                    <div class="color-options-detail" id="colorOptions">
+                        {% for c in product.get_colors_list %}
+                        <button class="color-btn {% if forloop.first %}active{% endif %}" style="background:{{ c }}"
+                            onclick="document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedColor='{{ c }}'"></button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="selector-group">
+                    <label>Quantity</label>
+                    <div class="qty-selector">
+                        <button onclick="changeQty(-1)"><i class="ri-subtract-line"></i></button>
+                        <input type="number" value="1" min="1" max="10" id="qtyInput" readonly>
+                        <button onclick="changeQty(1)"><i class="ri-add-line"></i></button>
+                    </div>
+                </div>
+
+                <div class="detail-btns">
+                    <button class="btn btn-primary btn-lg" onclick="addToCartDetail()"><i
+                            class="ri-shopping-bag-line"></i> Add to Cart</button>
+                    <button class="btn btn-outline btn-lg" onclick="toggleWishlistAPI({{ product.id }}, this)"><i
+                            class="ri-heart-line"></i></button>
+                </div>
+
+                <!-- Features -->
+                <div style="margin-top:2rem;display:flex;gap:1.5rem;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary)">
+                        <i class="ri-truck-line" style="color:var(--accent)"></i>Free Shipping</div>
+                    <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary)">
+                        <i class="ri-refresh-line" style="color:var(--accent)"></i>15 Day Returns</div>
+                    <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary)">
+                        <i class="ri-shield-check-line" style="color:var(--accent)"></i>Authentic</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="reviews-section" data-aos="fade-up">
+            <h3 style="font-size:1.3rem;text-transform:uppercase;margin-bottom:1.5rem">Reviews ({{ reviews|length }})
+            </h3>
+            {% for r in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="avatar">{{ r.name.0 }}</div>
+                    <div>
+                        <h4>{{ r.name }}</h4><span class="date">{{ r.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+                <div class="review-stars">
+                    <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                        class="ri-star-fill"></i>
+                    {% if r.rating >= 5 %}
+                    <i class="ri-star-fill"></i>
+                    {% else %}
+                    <i class="ri-star-half-fill"></i>
+                    {% endif %}
+                </div>
+                <p class="review-text">{{ r.text }}</p>
+            </div>
+            {% empty %}
+            <p style="color:var(--text-secondary)">No reviews yet. Be the first to review this product!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Related -->
+        {% if related %}
+        <div class="related-section" data-aos="fade-up">
+            <h3 style="font-size:1.3rem;text-transform:uppercase;margin-bottom:1.5rem">You May Also Like</h3>
+            <div class="products-grid">
+                {% for p in related %}
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        {% if p.badge %}
+                        <span class="product-badge {% if p.badge == 'Limited' %}limited{% endif %}">{{ p.badge }}</span>
+                        {% endif %}
+                        <a href="{% url 'product_detail' p.slug %}"><img src="{{ p.image }}" alt="{{ p.name }}"
+                                class="img-main"></a>
+                    </div>
+                    <div class="product-info">
+                        <h3><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
+                        <div class="product-price"><span class="current">₹{{ p.price }}</span></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    let selectedSize = 'M';
+    let selectedColor = '#000';
+
+    function switchImg(thumb) {
+        document.getElementById('mainImg').src = thumb.src;
+        document.querySelectorAll('.gallery-thumbs img').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+    }
+
+    function changeQty(d) {
+        const inp = document.getElementById('qtyInput');
+        const v = Math.max(1, Math.min(10, parseInt(inp.value) + d));
+        inp.value = v;
+    }
+
+    async function addToCartDetail() {
+        const qty = parseInt(document.getElementById('qtyInput').value);
+        await addToCartAPI({{ product.id }}, selectedSize, selectedColor, qty);
+  }
+
+    // Gallery zoom
+    const gallery = document.getElementById('mainGallery');
+    const mainImg = document.getElementById('mainImg');
+    gallery.addEventListener('mousemove', e => {
+        const r = gallery.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 100;
+        const y = ((e.clientY - r.top) / r.height) * 100;
+        mainImg.style.transformOrigin = `${x}% ${y}%`;
+        mainImg.style.transform = 'scale(1.8)';
+    });
+    gallery.addEventListener('mouseleave', () => { mainImg.style.transform = 'scale(1)'; });
+</script>
+{% endblock %}

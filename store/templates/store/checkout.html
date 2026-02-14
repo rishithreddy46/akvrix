@@ -1,0 +1,161 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Checkout — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Checkout</h1>
+        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'cart' %}">Cart</a> /
+            <span>Checkout</span></div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        {% if items %}
+        <div class="checkout-layout">
+            <div>
+                <h3 style="font-size:1rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.5rem">Shipping
+                    Details</h3>
+                <form id="checkoutForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>First Name *</label><input type="text" required id="firstName"
+                                placeholder="Rishith"></div>
+                        <div class="form-group"><label>Last Name *</label><input type="text" required id="lastName"
+                                placeholder="Reddy"></div>
+                        <div class="form-group full"><label>Email *</label><input type="email" required id="email"
+                                placeholder="you@example.com"></div>
+                        <div class="form-group full"><label>Phone *</label><input type="tel" required id="phone"
+                                placeholder="+91 98765 43210"></div>
+                        <div class="form-group full"><label>Address *</label><input type="text" required id="address"
+                                placeholder="123 Street, Apartment"></div>
+                        <div class="form-group"><label>City *</label><input type="text" required id="city"
+                                placeholder="Mumbai"></div>
+                        <div class="form-group"><label>State *</label><input type="text" required id="state"
+                                placeholder="Maharashtra"></div>
+                        <div class="form-group"><label>PIN Code *</label><input type="text" required id="zipCode"
+                                placeholder="400001"></div>
+                        <div class="form-group"><label>Country</label><select id="country">
+                                <option>India</option>
+                                <option>United States</option>
+                                <option>United Kingdom</option>
+                                <option>UAE</option>
+                            </select></div>
+                    </div>
+
+                    <h3 style="font-size:1rem;text-transform:uppercase;letter-spacing:.12em;margin:2rem 0 1rem">Payment
+                        Method</h3>
+                    <div class="payment-tabs">
+                        <button type="button" class="payment-tab active" onclick="selectPayment('card',this)"><i
+                                class="ri-bank-card-line"></i> Card</button>
+                        <button type="button" class="payment-tab" onclick="selectPayment('upi',this)"><i
+                                class="ri-smartphone-line"></i> UPI</button>
+                        <button type="button" class="payment-tab" onclick="selectPayment('cod',this)"><i
+                                class="ri-money-rupee-circle-line"></i> COD</button>
+                    </div>
+
+                    <div id="payCard">
+                        <div class="form-grid">
+                            <div class="form-group full"><label>Card Number</label><input type="text"
+                                    placeholder="4242 4242 4242 4242" maxlength="19"></div>
+                            <div class="form-group"><label>Expiry</label><input type="text" placeholder="MM/YY"></div>
+                            <div class="form-group"><label>CVV</label><input type="password" placeholder="•••"
+                                    maxlength="4"></div>
+                        </div>
+                    </div>
+                    <div id="payUpi" style="display:none">
+                        <div class="form-group"><label>UPI ID</label><input type="text" placeholder="yourname@upi">
+                        </div>
+                    </div>
+                    <div id="payCod" style="display:none">
+                        <div
+                            style="padding:1.5rem;background:var(--accent-glow);border-radius:var(--radius);border:1px solid rgba(0,212,255,.2)">
+                            <p style="font-size:.88rem"><i class="ri-information-line" style="color:var(--accent)"></i>
+                                Cash on delivery available. Pay when your order arrives.</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                {% for item in items %}
+                <div
+                    style="display:flex;gap:1rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+                    <img src="{{ item.product.image }}" alt="{{ item.product.name }}"
+                        style="width:60px;height:75px;object-fit:cover;border-radius:var(--radius)">
+                    <div style="flex:1">
+                        <h4 style="font-size:.82rem;margin-bottom:.25rem">{{ item.product.name }}</h4>
+                        <span style="font-size:.72rem;color:var(--text-muted)">{{ item.size }} &middot; Qty: {{
+                            item.quantity }}</span>
+                        <p style="font-size:.88rem;font-weight:600;margin-top:.25rem">₹{{ item.total }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="cart-summary-row"><span>Subtotal</span><span>₹{{ subtotal }}</span></div>
+                <div class="cart-summary-row"><span>Shipping</span><span>{% if shipping %}₹{{ shipping }}{% else %}<span
+                            style="color:var(--success)">Free</span>{% endif %}</span></div>
+                <div class="cart-summary-row total"><span>Total</span><span
+                        style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">₹{{
+                        total }}</span></div>
+                <button class="btn btn-primary btn-full btn-lg" style="margin-top:1rem" onclick="placeOrder()">
+                    <i class="ri-shield-check-line"></i> Place Order
+                </button>
+                <p style="font-size:.68rem;color:var(--text-muted);text-align:center;margin-top:.75rem">Secure checkout.
+                    Your data is encrypted.</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="ri-shopping-bag-line"></i>
+            <h2>Nothing to checkout</h2>
+            <p>Your cart is empty. Add some products first.</p>
+            <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    let paymentMethod = 'card';
+    function selectPayment(method, btn) {
+        paymentMethod = method;
+        document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('payCard').style.display = method === 'card' ? 'block' : 'none';
+        document.getElementById('payUpi').style.display = method === 'upi' ? 'block' : 'none';
+        document.getElementById('payCod').style.display = method === 'cod' ? 'block' : 'none';
+    }
+
+    async function placeOrder() {
+        const data = {
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            state: document.getElementById('state').value,
+            zip_code: document.getElementById('zipCode').value,
+            country: document.getElementById('country').value,
+            payment_method: paymentMethod
+        };
+        if (!data.first_name || !data.email || !data.address || !data.city) {
+            showToast('Please fill in all required fields', 'info'); return;
+        }
+        const r = await apiCall('/api/order/place/', data);
+        if (r.success) {
+            document.querySelector('.checkout-layout').innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <i class="ri-checkbox-circle-line" style="color:var(--success)"></i>
+        <h2>Order Placed!</h2>
+        <p>Your order <strong>${r.order_number}</strong> has been placed successfully. We'll send you a confirmation email shortly.</p>
+        <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Continue Shopping</a>
+      </div>`;
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}AKVRIX — Premium Men's Streetwear | Define Your Style{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-bg">
+        <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1920&h=1080&fit=crop" alt="AKVRIX Hero"
+            id="heroBg">
+    </div>
+    <div class="hero-content" data-aos="fade-up">
+        <span class="hero-label">Men's Streetwear — SS26 Collection</span>
+        <h1>DEFINE YOUR<br><span>STYLE</span></h1>
+        <p>Premium streetwear crafted for the modern man. Bold identity meets uncompromising quality.</p>
+        <div class="hero-btns">
+            <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Shop Now <i class="ri-arrow-right-line"></i></a>
+            <a href="{% url 'shop' %}?cat=new" class="btn btn-outline btn-lg">New Drops</a>
+        </div>
+    </div>
+    <div class="scroll-indicator"><span>Scroll</span>
+        <div class="mouse">
+            <div class="wheel"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Marquee -->
+<div style="background:var(--accent);padding:.6rem 0;overflow:hidden">
+    <div style="display:flex;gap:3rem;animation:marquee 20s linear infinite;white-space:nowrap">
+        {% for t in "x"|ljust:"8" %}<span
+            style="font-family:'Montserrat';font-weight:800;font-size:.8rem;color:#000;letter-spacing:.2em;text-transform:uppercase">FREE
+            SHIPPING ON ORDERS OVER ₹5,000 &nbsp;★&nbsp;</span>{% endfor %}
+    </div>
+</div>
+<style>
+    @keyframes marquee {
+        0% {
+            transform: translateX(0)
+        }
+
+        100% {
+            transform: translateX(-50%)
+        }
+    }
+</style>
+
+<!-- Categories -->
+<section class="section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="label">Browse</span>
+            <h2>Shop by Category</h2>
+        </div>
+        <div class="categories-grid">
+            {% for cat in categories %}
+            <a href="{% url 'shop' %}?cat={{ cat.slug }}" class="category-card" data-aos="fade-up"
+                data-aos-delay="{{ forloop.counter0 }}00">
+                <img src="{{ cat.img }}" alt="{{ cat.name }}">
+                <div class="category-overlay">
+                    <h3>{{ cat.name }}</h3>
+                    <span>Explore →</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Best Sellers -->
+<section class="section" style="background:var(--bg-alt)">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="label">Top Picks</span>
+            <h2>Best Sellers</h2>
+            <p>Our most popular pieces — chosen by the streets</p>
+        </div>
+        <div class="products-grid" id="bestSellers">
+            {% for p in best_sellers %}
+            <div class="product-card" data-aos="fade-up">
+                <div class="product-img-wrap">
+                    {% if p.badge %}
+                    <span
+                        class="product-badge {% if p.badge == 'Limited' %}limited{% elif p.badge == 'New' %}new{% endif %}">{{
+                        p.badge }}</span>
+                    {% endif %}
+                    <div class="product-wish">
+                        <button onclick="toggleWishlistAPI({{ p.id }}, this)"><i class="ri-heart-line"></i></button>
+                    </div>
+                    <a href="{% url 'product_detail' p.slug %}">
+                        <img src="{{ p.image }}" alt="{{ p.name }}" class="img-main">
+                        {% if p.image_hover %}
+                        <img src="{{ p.image_hover }}" alt="{{ p.name }}" class="img-hover">
+                        {% endif %}
+                    </a>
+                </div>
+                <div class="product-info">
+                    <h3><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
+                    <div class="product-price">
+                        <span class="current">₹{{ p.price }}</span>
+                        {% if p.old_price %}
+                        <span class="old">₹{{ p.old_price }}</span>
+                        <span class="discount">-{{ p.discount_percent }}%</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-rating">{{ p.rating }} <i class="ri-star-fill"></i> <span>({{ p.reviews_count
+                            }})</span></div>
+                    <div class="product-actions">
+                        <a href="{% url 'product_detail' p.slug %}" class="btn btn-primary btn-sm btn-full">View
+                            Product</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align:center;margin-top:2.5rem"><a href="{% url 'shop' %}" class="btn btn-outline">View All
+                Products <i class="ri-arrow-right-line"></i></a></div>
+    </div>
+</section>
+
+<!-- About -->
+<section class="section">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-img" data-aos="fade-right"><img
+                    src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&h=1000&fit=crop"
+                    alt="AKVRIX Brand"></div>
+            <div class="about-text" data-aos="fade-left">
+                <span class="label">Our Story</span>
+                <h2>Built for the<br>Bold</h2>
+                <p>AKVRIX was born from a simple belief: men's streetwear should be both premium and purposeful. Every
+                    piece is crafted with obsessive attention to detail, using only the finest materials sourced
+                    globally.</p>
+                <p>From heavyweight organic cotton to Japanese selvedge denim, we never compromise on quality. Our
+                    designs fuse futuristic aesthetics with timeless silhouettes.</p>
+                <div class="about-stats">
+                    <div class="stat">
+                        <h3>16K+</h3><span>Happy Customers</span>
+                    </div>
+                    <div class="stat">
+                        <h3>200+</h3><span>Unique Designs</span>
+                    </div>
+                    <div class="stat">
+                        <h3>4.9★</h3><span>Average Rating</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section testimonials">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="label">Reviews</span>
+            <h2>What Our Customers Say</h2>
+        </div>
+        <div class="testimonial-track" id="testiTrack">
+            <div class="testimonial-card">
+                <div class="stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                        class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+                <p>"AKVRIX has completely changed my wardrobe game. The quality is unmatched — the heavyweight cotton
+                    feels incredible. I've gotten compliments every single time I wear their pieces."</p>
+                <div class="testimonial-user">
+                    <div
+                        style="width:44px;height:44px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000">
+                        R</div>
+                    <div>
+                        <h4>Rahul M.</h4><span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                        class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+                <p>"The best investment I've made in clothes. The bomber jacket is absolutely premium — from the satin
+                    lining to the custom zippers. This brand understands what men want."</p>
+                <div class="testimonial-user">
+                    <div
+                        style="width:44px;height:44px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000">
+                        A</div>
+                    <div>
+                        <h4>Arjun K.</h4><span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                        class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+                <p>"Ordered 5 items and every single one exceeded expectations. The packaging alone tells you this is a
+                    premium brand. AKVRIX is the future of Indian streetwear."</p>
+                <div class="testimonial-user">
+                    <div
+                        style="width:44px;height:44px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000">
+                        D</div>
+                    <div>
+                        <h4>Dev S.</h4><span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                        class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-half-fill"></i></div>
+                <p>"Finally a brand that caters to men who care about what they wear. The fit, the fabric, the design —
+                    everything screams quality. My entire friend group is now ordering from AKVRIX."</p>
+                <div class="testimonial-user">
+                    <div
+                        style="width:44px;height:44px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000">
+                        K</div>
+                    <div>
+                        <h4>Karthik R.</h4><span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="section newsletter">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="label">Stay Connected</span>
+            <h2>Join the Movement</h2>
+            <p>Be the first to know about new drops, exclusive offers, and limited editions.</p>
+        </div>
+        <form class="newsletter-form" onsubmit="event.preventDefault();showToast('Welcome to AKVRIX!')">
+            <input type="email" placeholder="Your email address" required>
+            <button type="submit">Subscribe</button>
+        </form>
+    </div>
+</section>
+
+<script>
+    // Parallax hero
+    window.addEventListener('scroll', () => {
+        const bg = document.getElementById('heroBg');
+        if (bg) bg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
+    });
+</script>
+{% endblock %}

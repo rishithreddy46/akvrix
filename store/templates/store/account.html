@@ -1,0 +1,71 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}My Account — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>My Account</h1>
+    <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <span>Account</span></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="account-layout">
+      <aside class="account-sidebar">
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <h4>AKVRIX Member</h4>
+          <p style="font-size:.78rem;color:var(--text-muted)">member@akvrix.com</p>
+        </div>
+        <ul>
+          <li><a href="#" class="active" onclick="showTab('orders',this);return false"><i class="ri-shopping-bag-line"></i> Orders</a></li>
+          <li><a href="#" onclick="showTab('wishlist',this);return false"><i class="ri-heart-line"></i> Wishlist</a></li>
+          <li><a href="#" onclick="showTab('profile',this);return false"><i class="ri-user-line"></i> Profile</a></li>
+          <li><a href="#" onclick="showTab('settings',this);return false"><i class="ri-settings-3-line"></i> Settings</a></li>
+          <li><a href="{% url 'login' %}" style="color:var(--danger)"><i class="ri-logout-box-line"></i> Logout</a></li>
+        </ul>
+      </aside>
+
+      <div class="account-content" id="accountTab">
+        <h3 style="margin-bottom:1.5rem">Order History</h3>
+        <div class="order-card">
+          <div class="order-header"><div><strong>AKV-984521</strong><span> - Feb 10, 2026</span></div><span class="order-status delivered">Delivered</span></div>
+          <p style="font-size:.82rem;color:var(--text-secondary)">Shadow Oversized Tee x 1, AKVRIX Classic Hoodie x 1</p>
+          <p style="font-size:.9rem;font-weight:600;margin-top:.5rem;color:var(--accent)">Rs.218.00</p>
+        </div>
+        <div class="order-card">
+          <div class="order-header"><div><strong>AKV-831092</strong><span> - Jan 25, 2026</span></div><span class="order-status shipped">Shipped</span></div>
+          <p style="font-size:.82rem;color:var(--text-secondary)">Street Bomber Jacket x 1</p>
+          <p style="font-size:.9rem;font-weight:600;margin-top:.5rem;color:var(--accent)">Rs.249.00</p>
+        </div>
+        <div class="order-card">
+          <div class="order-header"><div><strong>AKV-720183</strong><span> - Jan 5, 2026</span></div><span class="order-status processing">Processing</span></div>
+          <p style="font-size:.82rem;color:var(--text-secondary)">Gold Edition Hoodie x 1</p>
+          <p style="font-size:.9rem;font-weight:600;margin-top:.5rem;color:var(--accent)">Rs.299.00</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function showTab(tab, link) {
+  const el = document.getElementById('accountTab');
+  if (link) {
+    document.querySelectorAll('.account-sidebar a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+  }
+  if (tab === 'orders') { location.reload(); }
+  else if (tab === 'wishlist') {
+    el.innerHTML = '<h3 style="margin-bottom:1.5rem">Wishlist</h3><p style="color:var(--text-secondary)">Your wishlist is empty. <a href="/shop/" style="color:var(--accent)">Start exploring</a>.</p>';
+  } else if (tab === 'profile') {
+    el.innerHTML = '<h3 style="margin-bottom:1.5rem">Profile Settings</h3><div class="form-grid"><div class="form-group"><label>First Name</label><input type="text" value="AKVRIX"></div><div class="form-group"><label>Last Name</label><input type="text" value="Member"></div><div class="form-group full"><label>Email</label><input type="email" value="member@akvrix.com"></div><div class="form-group full"><label>Phone</label><input type="tel" placeholder="+91 98765 43210"></div></div><button class="btn btn-primary" style="margin-top:1rem" onclick="showToast(\'Profile updated!\')">Save Changes</button>';
+  } else if (tab === 'settings') {
+    el.innerHTML = '<h3 style="margin-bottom:1.5rem">Settings</h3><div class="form-group"><label>Change Password</label><input type="password" placeholder="Current password" style="margin-bottom:.5rem"><input type="password" placeholder="New password" style="margin-bottom:.5rem"><input type="password" placeholder="Confirm new password"></div><button class="btn btn-primary" style="margin-top:1rem" onclick="showToast(\'Password updated!\')">Update Password</button>';
+  }
+}
+</script>
+{% endblock %}

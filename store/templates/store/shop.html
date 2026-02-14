@@ -1,0 +1,115 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Shop — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>{% if current_cat %}{{ current_cat|title }}{% else %}All Products{% endif %}</h1>
+    <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <span>Shop</span></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="shop-layout">
+      <aside class="filter-sidebar" id="filterSidebar">
+        <div class="filter-group">
+          <h4>Category</h4>
+          <label><input type="checkbox" value="streetwear" {% if current_cat == 'streetwear' %}checked{% endif %} onchange="applyFilter()"> Streetwear</label>
+          <label><input type="checkbox" value="essentials" {% if current_cat == 'essentials' %}checked{% endif %} onchange="applyFilter()"> Essentials</label>
+          <label><input type="checkbox" value="outerwear" {% if current_cat == 'outerwear' %}checked{% endif %} onchange="applyFilter()"> Outerwear</label>
+          <label><input type="checkbox" value="new" {% if current_cat == 'new' %}checked{% endif %} onchange="applyFilter()"> New Arrivals</label>
+          <label><input type="checkbox" value="limited" {% if current_cat == 'limited' %}checked{% endif %} onchange="applyFilter()"> Limited Edition</label>
+        </div>
+        <div class="filter-group">
+          <h4>Price Range</h4>
+          <input type="range" min="0" max="500" value="500" id="priceRange" oninput="document.getElementById('priceVal').textContent='₹'+this.value">
+          <div class="price-values"><span>₹0</span><span id="priceVal">₹500</span></div>
+        </div>
+        <div class="filter-group">
+          <h4>Size</h4>
+          <div class="size-options">
+            <button class="size-btn" onclick="this.classList.toggle('active')">S</button>
+            <button class="size-btn" onclick="this.classList.toggle('active')">M</button>
+            <button class="size-btn" onclick="this.classList.toggle('active')">L</button>
+            <button class="size-btn" onclick="this.classList.toggle('active')">XL</button>
+            <button class="size-btn" onclick="this.classList.toggle('active')">XXL</button>
+          </div>
+        </div>
+      </aside>
+
+      <div>
+        <div class="shop-toolbar">
+          <span>Showing {{ products|length }} products</span>
+          <div style="display:flex;gap:1rem;align-items:center">
+            <button class="btn btn-outline btn-sm filter-toggle-btn" onclick="document.getElementById('filterSidebar').classList.toggle('open')"><i class="ri-filter-3-line"></i> Filters</button>
+            <select id="sortSelect" onchange="doSort(this.value)">
+              <option value="featured" {% if current_sort == 'featured' %}selected{% endif %}>Featured</option>
+              <option value="low" {% if current_sort == 'low' %}selected{% endif %}>Price: Low to High</option>
+              <option value="high" {% if current_sort == 'high' %}selected{% endif %}>Price: High to Low</option>
+              <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+              <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Top Rated</option>
+            </select>
+          </div>
+        </div>
+        <div class="products-grid">
+          {% for p in products %}
+          <div class="product-card" data-aos="fade-up">
+            <div class="product-img-wrap">
+              {% if p.badge %}
+              <span class="product-badge {% if p.badge == 'Limited' %}limited{% elif p.badge == 'New' %}new{% endif %}">{{ p.badge }}</span>
+              {% endif %}
+              <div class="product-wish">
+                <button onclick="toggleWishlistAPI({{ p.id }}, this)"><i class="ri-heart-line"></i></button>
+              </div>
+              <a href="{% url 'product_detail' p.slug %}">
+                <img src="{{ p.image }}" alt="{{ p.name }}" class="img-main">
+                {% if p.image_hover %}
+                <img src="{{ p.image_hover }}" alt="{{ p.name }}" class="img-hover">
+                {% endif %}
+              </a>
+            </div>
+            <div class="product-info">
+              <h3><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
+              <div class="product-price">
+                <span class="current">₹{{ p.price }}</span>
+                {% if p.old_price %}
+                <span class="old">₹{{ p.old_price }}</span>
+                <span class="discount">-{{ p.discount_percent }}%</span>
+                {% endif %}
+              </div>
+              <div class="product-rating">{{ p.rating }} <i class="ri-star-fill"></i> <span>({{ p.reviews_count }})</span></div>
+              <div class="product-actions">
+                <a href="{% url 'product_detail' p.slug %}" class="btn btn-primary btn-sm btn-full">View Product</a>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="empty-state" style="grid-column:1/-1">
+            <i class="ri-shopping-bag-line"></i>
+            <h2>No products found</h2>
+            <p>Try adjusting your filters.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function applyFilter() {
+  const checks = document.querySelectorAll('.filter-group input[type=checkbox]:checked');
+  const cat = checks.length === 1 ? checks[0].value : '';
+  location.href = '/shop/' + (cat ? '?cat=' + cat : '');
+}
+function doSort(val) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('sort', val);
+  location.href = '/shop/?' + params.toString();
+}
+</script>
+{% endblock %}
