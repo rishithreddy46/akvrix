@@ -9,20 +9,23 @@ python manage.py migrate
 # Seed products if DB is fresh
 python manage.py seed_data
 
-# Create superuser (idempotent) — Akhil / Akhil@123
+# Create/reset single superuser — Akhil / Akhil@123
 python manage.py shell -c "
 from django.contrib.auth.models import User
-# Remove any other superusers
-User.objects.filter(is_superuser=True).exclude(username='Akhil').update(is_superuser=False, is_staff=False)
+# Delete ALL users except Akhil
+User.objects.exclude(username='Akhil').delete()
 if not User.objects.filter(username='Akhil').exists():
     User.objects.create_superuser('Akhil', 'akhil@akvrix.com', 'Akhil@123', first_name='Akhil')
     print('Superuser created: Akhil')
 else:
     u = User.objects.get(username='Akhil')
+    u.set_password('Akhil@123')
     u.is_superuser = True
     u.is_staff = True
+    u.email = 'akhil@akvrix.com'
+    u.first_name = 'Akhil'
     u.save()
-    print('Superuser Akhil verified')
+    print('Superuser Akhil reset with password Akhil@123')
 "
 
 # Ensure django.contrib.sites has a Site with SITE_ID=1
