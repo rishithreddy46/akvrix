@@ -18,6 +18,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8888',
     'http://127.0.0.1:8888',
 ]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 INSTALLED_APPS = [
