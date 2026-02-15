@@ -11,8 +11,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_35-n1z*atu+7w6b+(je@_gpf-*$=udfht&ppvh26%7npq&ix7')
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    'https://akvrix.onrender.com',
+    'http://localhost:8888',
+    'http://127.0.0.1:8888',
+]
 
 # Application definition
 INSTALLED_APPS = [
