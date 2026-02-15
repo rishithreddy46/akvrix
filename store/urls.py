@@ -18,7 +18,10 @@ urlpatterns = [
     path('account/', views.account_page, name='account'),
     path('my-orders/', views.my_orders_page, name='my_orders'),
     path('order/<str:order_number>/', views.order_detail_page, name='order_detail_page'),
-    # API
+    # Profile & Password APIs
+    path('api/profile/update/', views.update_profile, name='update_profile'),
+    path('api/password/change/', views.change_password, name='change_password'),
+    # Cart & Wishlist APIs
     path('api/cart/add/', views.add_to_cart, name='add_to_cart'),
     path('api/cart/update/', views.update_cart, name='update_cart'),
     path('api/wishlist/toggle/', views.toggle_wishlist, name='toggle_wishlist'),

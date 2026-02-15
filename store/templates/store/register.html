@@ -8,7 +8,8 @@
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <a href="{% url 'home' %}" class="nav-logo" style="font-size:1.8rem;margin-bottom:.5rem;display:inline-block">AKV<span>RIX</span></a>
+        <a href="{% url 'home' %}" class="nav-logo"
+          style="font-size:1.8rem;margin-bottom:.5rem;display:inline-block">AKV<span>RIX</span></a>
         <h1>Create Account</h1>
         <p>Join AKVRIX for exclusive access to drops, wishlist, and order tracking</p>
       </div>
@@ -48,7 +49,8 @@
           </div>
         </div>
         <label class="checkbox-wrap" style="margin-bottom:1.5rem">
-          <input type="checkbox" required> I agree to the <a href="#" style="color:var(--accent)">Terms of Service</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a>
+          <input type="checkbox" required> I agree to the <a href="#" style="color:var(--accent)">Terms of Service</a>
+          and <a href="#" style="color:var(--accent)">Privacy Policy</a>
         </label>
         <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
       </form>
@@ -56,8 +58,10 @@
       <div class="auth-divider"><span>or continue with</span></div>
 
       <div class="social-btns">
-        <button class="social-btn"><i class="ri-google-fill"></i> Google</button>
-        <button class="social-btn"><i class="ri-apple-fill"></i> Apple</button>
+        <a href="/accounts/google/login/?process=login&next=/shop/" class="social-btn"><i class="ri-google-fill"></i>
+          Google</a>
+        <a href="/accounts/apple/login/?process=login&next=/shop/" class="social-btn"><i class="ri-apple-fill"></i>
+          Apple</a>
       </div>
 
       <p class="auth-footer">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>

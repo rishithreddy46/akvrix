@@ -8,7 +8,8 @@
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <a href="{% url 'home' %}" class="nav-logo" style="font-size:1.8rem;margin-bottom:.5rem;display:inline-block">AKV<span>RIX</span></a>
+        <a href="{% url 'home' %}" class="nav-logo"
+          style="font-size:1.8rem;margin-bottom:.5rem;display:inline-block">AKV<span>RIX</span></a>
         <h1>Welcome Back</h1>
         <p>Sign in to access your account, wishlist, and orders</p>
       </div>
@@ -20,10 +21,10 @@
       <form method="POST" class="auth-form">
         {% csrf_token %}
         <div class="form-group">
-          <label>Email Address</label>
+          <label>Email or Username</label>
           <div class="input-icon">
             <i class="ri-mail-line"></i>
-            <input type="email" name="email" placeholder="your@email.com" required>
+            <input type="text" name="email" placeholder="Email or username" required>
           </div>
         </div>
         <div class="form-group">
@@ -43,8 +44,10 @@
       <div class="auth-divider"><span>or continue with</span></div>
 
       <div class="social-btns">
-        <button class="social-btn"><i class="ri-google-fill"></i> Google</button>
-        <button class="social-btn"><i class="ri-apple-fill"></i> Apple</button>
+        <a href="/accounts/google/login/?process=login&next=/shop/" class="social-btn"><i class="ri-google-fill"></i>
+          Google</a>
+        <a href="/accounts/apple/login/?process=login&next=/shop/" class="social-btn"><i class="ri-apple-fill"></i>
+          Apple</a>
       </div>
 
       <p class="auth-footer">Don't have an account? <a href="{% url 'register' %}">Create one</a></p>
