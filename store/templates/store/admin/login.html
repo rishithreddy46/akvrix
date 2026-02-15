@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — AKVRIX</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#1a1a2e;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-card{background:#fff;border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{font-family:'Montserrat',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:.2em;text-align:center;margin-bottom:.5rem;color:#1a1a2e}
+.login-logo span{color:#888}
+.login-sub{text-align:center;font-size:.82rem;color:#888;margin-bottom:2rem}
+.form-group{margin-bottom:1.25rem}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:#555;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.04em}
+.form-group input{width:100%;padding:.75rem 1rem;border:1px solid #ddd;border-radius:8px;font-size:.9rem;font-family:inherit;transition:border .2s}
+.form-group input:focus{outline:none;border-color:#1a1a2e;box-shadow:0 0 0 3px rgba(26,26,46,.08)}
+.btn{width:100%;padding:.85rem;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s;font-family:inherit}
+.btn:hover{background:#2d2d4e}
+.error{background:#ffebee;color:#c62828;padding:.65rem 1rem;border-radius:8px;font-size:.82rem;margin-bottom:1rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="login-card">
+<div class="login-logo">AKV<span>RIX</span></div>
+<p class="login-sub">Admin Dashboard</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<form method="POST">
+{% csrf_token %}
+<div class="form-group">
+<label>Username</label>
+<input type="text" name="username" placeholder="admin" required autofocus>
+</div>
+<div class="form-group">
+<label>Password</label>
+<input type="password" name="password" placeholder="Enter password" required>
+</div>
+<button type="submit" class="btn">Sign In to Dashboard</button>
+</form>
+</div>
+</body>
+</html>

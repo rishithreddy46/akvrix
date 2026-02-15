@@ -1,13 +1,13 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AKVRIX — Premium Men's Streetwear{% endblock %}</title>
     <meta name="description"
-        content="{% block description %}Premium men's streetwear. Bold identity, quality craftsmanship, and futuristic design.{% endblock %}">
+        content="{% block description %}Premium men's streetwear. Bold identity, quality craftsmanship.{% endblock %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
     {% block extra_css %}{% endblock %}
@@ -47,10 +47,27 @@
         </ul>
         <div class="nav-actions">
             <button id="searchToggle"><i class="ri-search-line"></i></button>
-            <button id="darkModeToggle"><i class="ri-moon-line"></i></button>
-            <a href="{% url 'account' %}"><i class="ri-user-line"></i></a>
+            <button id="darkModeToggle" title="Toggle dark mode"><i class="ri-moon-line"></i></button>
+            {% if is_logged_in %}
+            <a href="{% url 'wishlist' %}" title="Wishlist"><i class="ri-heart-line"></i></a>
             <a href="{% url 'cart' %}" style="position:relative"><i class="ri-shopping-bag-line"></i><span
                     class="cart-count">{{ cart_count }}</span></a>
+            <div class="nav-user-dropdown">
+                <button class="nav-user-btn"><i class="ri-user-line"></i> <span class="nav-user-name">{{ user_name }}</span> <i class="ri-arrow-down-s-line"></i></button>
+                <div class="nav-dropdown-menu">
+                    <a href="{% url 'account' %}"><i class="ri-user-settings-line"></i> My Account</a>
+                    <a href="{% url 'my_orders' %}"><i class="ri-file-list-3-line"></i> My Orders</a>
+                    <a href="{% url 'wishlist' %}"><i class="ri-heart-line"></i> Wishlist</a>
+                    <a href="{% url 'cart' %}"><i class="ri-shopping-bag-line"></i> Cart</a>
+                    <hr style="border-color:var(--border);margin:.5rem 0">
+                    <a href="{% url 'logout' %}" style="color:var(--danger)"><i class="ri-logout-box-line"></i> Sign
+                        Out</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline btn-sm nav-signin-btn"><i class="ri-user-line"></i> Sign
+                In</a>
+            {% endif %}
             <button class="nav-toggle"><span></span><span></span><span></span></button>
         </div>
     </nav>
@@ -120,10 +137,17 @@
                     class="ri-home-line"></i>Home</a>
             <a href="{% url 'shop' %}" {% if '/shop' in request.path %}class="active" {% endif %}><i
                     class="ri-search-line"></i>Shop</a>
+            {% if is_logged_in %}
+            <a href="{% url 'wishlist' %}" {% if '/wishlist' in request.path %}class="active" {% endif %}><i
+                    class="ri-heart-line"></i>Wishlist</a>
             <a href="{% url 'cart' %}" {% if '/cart' in request.path %}class="active" {% endif %}><i
                     class="ri-shopping-bag-line"></i>Cart</a>
             <a href="{% url 'account' %}" {% if '/account' in request.path %}class="active" {% endif %}><i
                     class="ri-user-line"></i>Account</a>
+            {% else %}
+            <a href="{% url 'login' %}" {% if '/login' in request.path %}class="active" {% endif %}><i
+                    class="ri-user-line"></i>Sign In</a>
+            {% endif %}
         </nav>
     </div>
 

@@ -1,34 +1,54 @@
 {% extends 'store/base.html' %}
 {% load static %}
-{% block title %}Login — AKVRIX{% endblock %}
-{% block footer %}{% endblock %}
+{% block title %}Sign In — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
 
 {% block content %}
-<div class="auth-page">
+<section class="auth-section">
+  <div class="auth-container">
     <div class="auth-card">
-        <a href="{% url 'home' %}" class="nav-logo"
-            style="text-align:center;display:block;margin-bottom:2rem;font-size:1.8rem">AKV<span>RIX</span></a>
+      <div class="auth-header">
+        <a href="{% url 'home' %}" class="nav-logo" style="font-size:1.8rem;margin-bottom:.5rem;display:inline-block">AKV<span>RIX</span></a>
         <h1>Welcome Back</h1>
-        <p class="subtitle">Sign in to your account</p>
-        <form id="loginForm" method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            <div class="form-group"><label>Email</label><input type="email" name="email" required
-                    placeholder="you@example.com" id="loginEmail"></div>
-            <div class="form-group"><label>Password</label><input type="password" name="password" required
-                    placeholder="••••••••" id="loginPass"></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-                <label style="font-size:.78rem;display:flex;align-items:center;gap:.4rem;cursor:pointer"><input
-                        type="checkbox" style="accent-color:var(--accent)"> Remember me</label>
-                <a href="#" style="font-size:.78rem;color:var(--accent)">Forgot password?</a>
-            </div>
-            <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
-        </form>
-        <div class="auth-divider">or continue with</div>
-        <div style="display:flex;gap:.75rem">
-            <button class="btn btn-outline btn-full"><i class="ri-google-fill"></i> Google</button>
-            <button class="btn btn-outline btn-full"><i class="ri-apple-fill"></i> Apple</button>
+        <p>Sign in to access your account, wishlist, and orders</p>
+      </div>
+
+      {% if error %}
+      <div class="auth-error"><i class="ri-error-warning-line"></i> {{ error }}</div>
+      {% endif %}
+
+      <form method="POST" class="auth-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-icon">
+            <i class="ri-mail-line"></i>
+            <input type="email" name="email" placeholder="your@email.com" required>
+          </div>
         </div>
-        <p class="auth-footer">Don't have an account? <a href="{% url 'register' %}">Create one</a></p>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-icon">
+            <i class="ri-lock-line"></i>
+            <input type="password" name="password" placeholder="Enter your password" required>
+          </div>
+        </div>
+        <div class="auth-options">
+          <label class="checkbox-wrap"><input type="checkbox" checked> Remember me</label>
+          <a href="{% url 'forgot_password' %}" class="auth-link">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+      </form>
+
+      <div class="auth-divider"><span>or continue with</span></div>
+
+      <div class="social-btns">
+        <button class="social-btn"><i class="ri-google-fill"></i> Google</button>
+        <button class="social-btn"><i class="ri-apple-fill"></i> Apple</button>
+      </div>
+
+      <p class="auth-footer">Don't have an account? <a href="{% url 'register' %}">Create one</a></p>
     </div>
-</div>
+  </div>
+</section>
 {% endblock %}

@@ -1,40 +1,67 @@
 {% extends 'store/base.html' %}
 {% load static %}
-{% block title %}Register — AKVRIX{% endblock %}
-{% block footer %}{% endblock %}
+{% block title %}Create Account — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
 
 {% block content %}
-<div class="auth-page">
+<section class="auth-section">
+  <div class="auth-container">
     <div class="auth-card">
-        <a href="{% url 'home' %}" class="nav-logo"
-            style="text-align:center;display:block;margin-bottom:2rem;font-size:1.8rem">AKV<span>RIX</span></a>
-        <h1>Join AKVRIX</h1>
-        <p class="subtitle">Create your account and define your style</p>
-        <form method="post" action="{% url 'register' %}">
-            {% csrf_token %}
-            <div class="form-grid">
-                <div class="form-group"><label>First Name</label><input type="text" required placeholder="Rishith">
-                </div>
-                <div class="form-group"><label>Last Name</label><input type="text" required placeholder="Reddy"></div>
-            </div>
-            <div class="form-group"><label>Email</label><input type="email" required placeholder="you@example.com">
-            </div>
-            <div class="form-group"><label>Password</label><input type="password" required placeholder="••••••••"
-                    minlength="6"></div>
-            <div class="form-group"><label>Confirm Password</label><input type="password" required
-                    placeholder="••••••••"></div>
-            <label
-                style="font-size:.78rem;display:flex;align-items:center;gap:.4rem;cursor:pointer;margin-bottom:1.5rem"><input
-                    type="checkbox" required style="accent-color:var(--accent)"> I agree to the <a href="#"
-                    style="color:var(--accent)">Terms & Conditions</a></label>
-            <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
-        </form>
-        <div class="auth-divider">or continue with</div>
-        <div style="display:flex;gap:.75rem">
-            <button class="btn btn-outline btn-full"><i class="ri-google-fill"></i> Google</button>
-            <button class="btn btn-outline btn-full"><i class="ri-apple-fill"></i> Apple</button>
+      <div class="auth-header">
+        <a href="{% url 'home' %}" class="nav-logo" style="font-size:1.8rem;margin-bottom:.5rem;display:inline-block">AKV<span>RIX</span></a>
+        <h1>Create Account</h1>
+        <p>Join AKVRIX for exclusive access to drops, wishlist, and order tracking</p>
+      </div>
+
+      {% if error %}
+      <div class="auth-error"><i class="ri-error-warning-line"></i> {{ error }}</div>
+      {% endif %}
+
+      <form method="POST" class="auth-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Full Name</label>
+          <div class="input-icon">
+            <i class="ri-user-line"></i>
+            <input type="text" name="name" placeholder="Your full name" required>
+          </div>
         </div>
-        <p class="auth-footer">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-icon">
+            <i class="ri-mail-line"></i>
+            <input type="email" name="email" placeholder="your@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-icon">
+            <i class="ri-lock-line"></i>
+            <input type="password" name="password" placeholder="Create a password" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <div class="input-icon">
+            <i class="ri-lock-check-line"></i>
+            <input type="password" name="confirm_password" placeholder="Confirm your password" required>
+          </div>
+        </div>
+        <label class="checkbox-wrap" style="margin-bottom:1.5rem">
+          <input type="checkbox" required> I agree to the <a href="#" style="color:var(--accent)">Terms of Service</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a>
+        </label>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
+      </form>
+
+      <div class="auth-divider"><span>or continue with</span></div>
+
+      <div class="social-btns">
+        <button class="social-btn"><i class="ri-google-fill"></i> Google</button>
+        <button class="social-btn"><i class="ri-apple-fill"></i> Apple</button>
+      </div>
+
+      <p class="auth-footer">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
     </div>
-</div>
+  </div>
+</section>
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'store/admin/base.html' %}
+{% block title %}Delete Product{% endblock %}
+{% block page_title %}Delete Product{% endblock %}
+{% block content %}
+<div class="card" style="max-width:500px;margin:2rem auto">
+<div class="delete-confirm">
+<i class="ri-error-warning-line"></i>
+<h2>Delete "{{ product.name }}"?</h2>
+<p>This action cannot be undone. The product will be permanently removed from the store.</p>
+<form method="POST" style="display:flex;gap:.75rem;justify-content:center">
+{% csrf_token %}
+<button type="submit" class="btn btn-primary" style="background:#c62828"><i class="ri-delete-bin-line"></i> Yes, Delete</button>
+<a href="{% url 'admin_products' %}" class="btn btn-outline">Cancel</a>
+</form>
+</div>
+</div>
+{% endblock %}

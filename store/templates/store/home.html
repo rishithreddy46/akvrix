@@ -82,8 +82,7 @@
                 <div class="product-img-wrap">
                     {% if p.badge %}
                     <span
-                        class="product-badge {% if p.badge == 'Limited' %}limited{% elif p.badge == 'New' %}new{% endif %}">{{
-                        p.badge }}</span>
+                        class="product-badge {% if p.badge == 'Limited' %}limited{% elif p.badge == 'New' %}new{% endif %}">{{ p.badge }}</span>
                     {% endif %}
                     <div class="product-wish">
                         <button onclick="toggleWishlistAPI({{ p.id }}, this)"><i class="ri-heart-line"></i></button>

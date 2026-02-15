@@ -7,8 +7,7 @@
 {% block content %}
 <div class="page-header">
     <div class="container">
-        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{
-                product.name }}</span></div>
+        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{ product.name }}</span></div>
     </div>
 </div>
 
@@ -59,11 +58,10 @@
                     <label>Size</label>
                     <div class="size-options" id="sizeOptions">
                         {% for s in product.get_sizes_list %}
-                        <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}"
-                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{
-                            s }}</button>
+                        <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}" onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{ s }}</button>
                         {% endfor %}
                     </div>
+
                 </div>
 
                 <!-- Color Selector -->
@@ -97,11 +95,14 @@
                 <!-- Features -->
                 <div style="margin-top:2rem;display:flex;gap:1.5rem;flex-wrap:wrap">
                     <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary)">
-                        <i class="ri-truck-line" style="color:var(--accent)"></i>Free Shipping</div>
+                        <i class="ri-truck-line" style="color:var(--accent)"></i>Free Shipping
+                    </div>
                     <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary)">
-                        <i class="ri-refresh-line" style="color:var(--accent)"></i>15 Day Returns</div>
+                        <i class="ri-refresh-line" style="color:var(--accent)"></i>15 Day Returns
+                    </div>
                     <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary)">
-                        <i class="ri-shield-check-line" style="color:var(--accent)"></i>Authentic</div>
+                        <i class="ri-shield-check-line" style="color:var(--accent)"></i>Authentic
+                    </div>
                 </div>
             </div>
         </div>

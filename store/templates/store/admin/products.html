@@ -1,0 +1,43 @@
+{% extends 'store/admin/base.html' %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+{% block content %}
+<div class="filter-bar">
+<a href="{% url 'admin_product_add' %}" class="btn btn-primary"><i class="ri-add-line"></i> Add Product</a>
+<select onchange="location.href='?cat='+this.value">
+<option value="">All Categories</option>
+{% for val, label in categories %}
+<option value="{{ val }}" {% if current_cat == val %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+<span style="color:#888;font-size:.82rem;margin-left:auto">{{ products|length }} product{{ products|length|pluralize }}</span>
+</div>
+
+<div class="card">
+<div class="table-wrap">
+<table>
+<thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Old Price</th><th>Badge</th><th>Stock</th><th>Rating</th><th>Actions</th></tr></thead>
+<tbody>
+{% for p in products %}
+<tr>
+<td><img src="{{ p.image }}" alt="{{ p.name }}"></td>
+<td style="font-weight:600">{{ p.name }}</td>
+<td><span class="badge badge-gray">{{ p.get_category_display }}</span></td>
+<td style="font-weight:600">&#8377;{{ p.price }}</td>
+<td>{% if p.old_price %}&#8377;{{ p.old_price }}{% else %}-{% endif %}</td>
+<td>{% if p.badge %}<span class="badge badge-blue">{{ p.badge }}</span>{% else %}-{% endif %}</td>
+<td>{% if p.in_stock %}<span class="badge badge-green">In Stock</span>{% else %}<span class="badge badge-red">Out</span>{% endif %}</td>
+<td><i class="ri-star-fill" style="color:#ff9800;font-size:.75rem"></i> {{ p.rating }}</td>
+<td class="actions">
+<a href="{% url 'admin_product_edit' p.id %}" class="btn btn-sm btn-outline"><i class="ri-edit-line"></i></a>
+<a href="{% url 'admin_product_delete' p.id %}" class="btn btn-sm btn-danger"><i class="ri-delete-bin-line"></i></a>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="9" style="text-align:center;color:#888;padding:2rem">No products found</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

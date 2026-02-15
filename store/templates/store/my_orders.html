@@ -1,0 +1,47 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}My Orders — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1>My Orders</h1></div></div>
+<section class="section"><div class="container">
+{% if orders %}
+<div class="orders-list">
+{% for o in orders %}
+<div class="order-card" style="background:var(--bg-card);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;border:1px solid var(--border)">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+<div>
+<h3 style="font-size:1rem;color:var(--text)">Order #{{ o.order_number }}</h3>
+<p style="font-size:.8rem;color:var(--text-secondary)">Placed on {{ o.created_at|date:"M d, Y" }}</p>
+</div>
+<div style="display:flex;align-items:center;gap:1rem">
+<span class="order-status-badge status-{{ o.status }}" style="padding:.35rem .85rem;border-radius:20px;font-size:.75rem;font-weight:600;text-transform:uppercase;
+{% if o.status == 'delivered' %}background:#e8f5e9;color:#2e7d32
+{% elif o.status == 'shipped' or o.status == 'out_for_delivery' %}background:#e3f2fd;color:#1565c0
+{% elif o.status == 'cancelled' %}background:#ffebee;color:#c62828
+{% else %}background:#fff3e0;color:#e65100{% endif %}">{{ o.get_status_display }}</span>
+<span style="font-size:1.1rem;font-weight:700;color:var(--text)">₹{{ o.total }}</span>
+</div>
+</div>
+<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+{% for item in o.items.all %}
+<div style="display:flex;align-items:center;gap:.5rem;background:var(--bg-alt);padding:.4rem .8rem;border-radius:6px;font-size:.82rem;color:var(--text-secondary)">
+{% if item.product %}<img src="{{ item.product.image }}" style="width:30px;height:36px;object-fit:cover;border-radius:4px" alt="">{% endif %}
+{{ item.product_name }} x{{ item.quantity }}
+</div>
+{% endfor %}
+</div>
+<a href="{% url 'order_detail_page' o.order_number %}" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;color:var(--accent);text-decoration:none">View Details <i class="ri-arrow-right-s-line"></i></a>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:4rem 2rem">
+<i class="ri-shopping-bag-line" style="font-size:4rem;color:var(--text-muted);display:block;margin-bottom:1rem"></i>
+<h2 style="color:var(--text);margin-bottom:.5rem">No orders yet</h2>
+<p style="color:var(--text-secondary);margin-bottom:2rem">Start shopping to see your orders here.</p>
+<a href="{% url 'shop' %}" class="btn btn-primary">Browse Shop</a>
+</div>
+{% endif %}
+</div></section>
+{% endblock %}

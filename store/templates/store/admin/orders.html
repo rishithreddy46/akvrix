@@ -1,0 +1,39 @@
+{% extends 'store/admin/base.html' %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block content %}
+<div class="filter-bar">
+<select onchange="location.href='?status='+this.value">
+<option value="">All Statuses</option>
+{% for val, label in status_choices %}
+<option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+<span style="color:#888;font-size:.82rem;margin-left:auto">{{ orders|length }} order{{ orders|length|pluralize }}</span>
+</div>
+
+<div class="card">
+<div class="table-wrap">
+<table>
+<thead><tr><th>Order #</th><th>Customer</th><th>Email</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+<tbody>
+{% for o in orders %}
+<tr>
+<td style="font-weight:600">{{ o.order_number }}</td>
+<td>{{ o.first_name }} {{ o.last_name }}</td>
+<td style="font-size:.8rem;color:#888">{{ o.email }}</td>
+<td>{{ o.items.count }}</td>
+<td style="font-weight:600">&#8377;{{ o.total }}</td>
+<td><span class="badge badge-gray" style="text-transform:capitalize">{{ o.payment_method }}</span></td>
+<td><span class="status status-{{ o.status }}">{{ o.get_status_display }}</span></td>
+<td style="font-size:.8rem;color:#888">{{ o.created_at|date:"M d, Y" }}</td>
+<td><a href="{% url 'admin_order_detail' o.id %}" class="btn btn-sm btn-outline"><i class="ri-eye-line"></i></a></td>
+</tr>
+{% empty %}
+<tr><td colspan="9" style="text-align:center;color:#888;padding:2rem">No orders yet</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

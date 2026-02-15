@@ -1,0 +1,80 @@
+{% extends 'store/admin/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block content %}
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-icon blue"><i class="ri-shopping-bag-line"></i></div>
+<div class="stat-value">{{ total_products }}</div>
+<div class="stat-label">Total Products</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon green"><i class="ri-file-list-3-line"></i></div>
+<div class="stat-value">{{ total_orders }}</div>
+<div class="stat-label">Total Orders</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon orange"><i class="ri-money-rupee-circle-line"></i></div>
+<div class="stat-value">&#8377;{{ total_revenue }}</div>
+<div class="stat-label">Total Revenue</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon purple"><i class="ri-star-line"></i></div>
+<div class="stat-value">{{ total_reviews }}</div>
+<div class="stat-label">Total Reviews</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:#fce4ec;color:#e91e63"><i class="ri-group-line"></i></div>
+<div class="stat-value">{{ total_customers }}</div>
+<div class="stat-label">Customers</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+<div class="card">
+<div class="card-header">
+<h2>Recent Orders</h2>
+<a href="{% url 'admin_orders' %}" class="btn btn-sm btn-outline">View All</a>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+<tbody>
+{% for o in recent_orders %}
+<tr>
+<td><a href="{% url 'admin_order_detail' o.id %}" style="color:#1a1a2e;font-weight:600">{{ o.order_number }}</a></td>
+<td>{{ o.first_name }} {{ o.last_name }}</td>
+<td style="font-weight:600">&#8377;{{ o.total }}</td>
+<td><span class="status status-{{ o.status }}">{{ o.get_status_display }}</span></td>
+</tr>
+{% empty %}
+<tr><td colspan="4" style="text-align:center;color:#888;padding:2rem">No orders yet</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<div class="card-header">
+<h2>Top Rated Products</h2>
+<a href="{% url 'admin_products' %}" class="btn btn-sm btn-outline">View All</a>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Product</th><th>Price</th><th>Rating</th><th>Category</th></tr></thead>
+<tbody>
+{% for p in top_products %}
+<tr>
+<td style="display:flex;align-items:center;gap:.75rem"><img src="{{ p.image }}" alt="">{{ p.name }}</td>
+<td style="font-weight:600">&#8377;{{ p.price }}</td>
+<td><i class="ri-star-fill" style="color:#ff9800;font-size:.8rem"></i> {{ p.rating }}</td>
+<td><span class="badge badge-gray">{{ p.get_category_display }}</span></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+{% endblock %}

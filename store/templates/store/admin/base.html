@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Dashboard{% endblock %} — AKVRIX Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;display:flex}
+a{color:inherit;text-decoration:none}
+/* Sidebar */
+.sidebar{width:260px;background:#1a1a2e;color:#fff;min-height:100vh;position:fixed;left:0;top:0;padding:0;display:flex;flex-direction:column;z-index:100}
+.sidebar-logo{padding:1.5rem;font-family:'Montserrat',sans-serif;font-size:1.4rem;font-weight:900;letter-spacing:.2em;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-logo span{color:#C0C0C0}
+.sidebar-nav{flex:1;padding:1rem 0}
+.sidebar-nav a{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.5rem;font-size:.85rem;font-weight:500;color:rgba(255,255,255,.6);transition:all .2s;border-left:3px solid transparent}
+.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.06);color:#fff;border-left-color:#C0C0C0}
+.sidebar-nav a i{font-size:1.1rem;width:20px}
+.sidebar-nav .divider{height:1px;background:rgba(255,255,255,.08);margin:.75rem 1.5rem}
+.sidebar-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-bottom a{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:rgba(255,255,255,.5);transition:color .2s}
+.sidebar-bottom a:hover{color:#ff6b6b}
+/* Main */
+.main{margin-left:260px;flex:1;min-height:100vh}
+.topbar{background:#fff;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e8ecef;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:1.3rem;font-weight:700;color:#1a1a2e}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.topbar-right a{font-size:.82rem;color:#666;transition:color .2s}
+.topbar-right a:hover{color:#1a1a2e}
+.content{padding:2rem}
+/* Cards */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:2rem}
+.stat-card{background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-card .stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1rem}
+.stat-card .stat-icon.blue{background:#e8f4fd;color:#2196f3}
+.stat-card .stat-icon.green{background:#e8f5e9;color:#4caf50}
+.stat-card .stat-icon.orange{background:#fff3e0;color:#ff9800}
+.stat-card .stat-icon.purple{background:#f3e5f5;color:#9c27b0}
+.stat-card .stat-value{font-size:1.8rem;font-weight:700;color:#1a1a2e}
+.stat-card .stat-label{font-size:.78rem;color:#888;margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em}
+/* Table */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;margin-bottom:1.5rem}
+.card-header{padding:1.25rem 1.5rem;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.card-header h2{font-size:1rem;font-weight:600}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:.75rem 1rem;text-align:left;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#888;background:#fafafa;border-bottom:1px solid #f0f0f0}
+td{padding:.75rem 1rem;font-size:.85rem;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tr:hover td{background:#fafbfc}
+td img{width:45px;height:55px;object-fit:cover;border-radius:6px}
+/* Badges */
+.badge{display:inline-block;padding:.25rem .65rem;font-size:.7rem;font-weight:600;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.badge-green{background:#e8f5e9;color:#2e7d32}
+.badge-blue{background:#e3f2fd;color:#1565c0}
+.badge-orange{background:#fff3e0;color:#e65100}
+.badge-red{background:#ffebee;color:#c62828}
+.badge-gray{background:#f5f5f5;color:#666}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;font-size:.8rem;font-weight:600;border-radius:8px;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:#1a1a2e;color:#fff}
+.btn-primary:hover{background:#2d2d4e;transform:translateY(-1px)}
+.btn-sm{padding:.4rem .8rem;font-size:.75rem}
+.btn-danger{background:#ffebee;color:#c62828}
+.btn-danger:hover{background:#ffcdd2}
+.btn-outline{border:1px solid #ddd;background:#fff;color:#555}
+.btn-outline:hover{border-color:#1a1a2e;color:#1a1a2e}
+.btn-success{background:#e8f5e9;color:#2e7d32}
+.btn-success:hover{background:#c8e6c9}
+/* Forms */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.form-group{margin-bottom:1rem}
+.form-group.full{grid-column:1/-1}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:#555;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.04em}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.6rem .85rem;border:1px solid #ddd;border-radius:8px;font-size:.88rem;font-family:inherit;color:#1a1a2e;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#1a1a2e;box-shadow:0 0 0 3px rgba(26,26,46,.08)}
+.form-group textarea{resize:vertical;min-height:100px}
+/* Status */
+.status{display:inline-flex;align-items:center;gap:.35rem}
+.status::before{content:'';width:7px;height:7px;border-radius:50%}
+.status-processing::before{background:#ff9800}
+.status-shipped::before{background:#2196f3}
+.status-delivered::before{background:#4caf50}
+/* Actions */
+.actions{display:flex;gap:.5rem}
+/* Filter bar */
+.filter-bar{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.filter-bar select{padding:.5rem .85rem;border:1px solid #ddd;border-radius:8px;font-size:.82rem;background:#fff}
+/* Delete confirm */
+.delete-confirm{text-align:center;padding:3rem 2rem}
+.delete-confirm i{font-size:3rem;color:#c62828;margin-bottom:1rem}
+.delete-confirm h2{margin-bottom:.5rem}
+.delete-confirm p{color:#666;margin-bottom:2rem}
+/* Responsive */
+@media(max-width:768px){
+.sidebar{width:60px;overflow:hidden}
+.sidebar-logo,.sidebar-nav a span,.sidebar-bottom span{display:none}
+.sidebar-nav a{justify-content:center;padding:.75rem}
+.main{margin-left:60px}
+.content{padding:1rem}
+.form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+<div class="sidebar-logo">AKV<span>RIX</span></div>
+<nav class="sidebar-nav">
+<a href="{% url 'admin_dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}"><i class="ri-dashboard-line"></i> <span>Dashboard</span></a>
+<a href="{% url 'admin_products' %}" class="{% if '/products' in request.path %}active{% endif %}"><i class="ri-shopping-bag-line"></i> <span>Products</span></a>
+<a href="{% url 'admin_orders' %}" class="{% if '/orders' in request.path %}active{% endif %}"><i class="ri-file-list-3-line"></i> <span>Orders</span></a>
+<a href="{% url 'admin_reviews' %}" class="{% if '/reviews' in request.path %}active{% endif %}"><i class="ri-star-line"></i> <span>Reviews</span></a>
+<a href="{% url 'admin_customers' %}" class="{% if '/customers' in request.path %}active{% endif %}"><i class="ri-group-line"></i> <span>Customers</span></a>
+<div class="divider"></div>
+<a href="{% url 'home' %}" target="_blank"><i class="ri-external-link-line"></i> <span>View Store</span></a>
+</nav>
+<div class="sidebar-bottom">
+<a href="{% url 'admin_logout' %}"><i class="ri-logout-box-line"></i> <span>Sign Out</span></a>
+</div>
+</aside>
+<div class="main">
+<div class="topbar">
+<h1>{% block page_title %}Dashboard{% endblock %}</h1>
+<div class="topbar-right">
+<a href="{% url 'home' %}" target="_blank"><i class="ri-external-link-line"></i> View Store</a>
+</div>
+</div>
+<div class="content">
+{% block content %}{% endblock %}
+</div>
+</div>
+</body>
+</html>

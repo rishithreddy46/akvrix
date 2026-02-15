@@ -39,7 +39,7 @@ function initNav() {
 
 function initDarkMode() {
     const btn = document.getElementById('darkModeToggle');
-    const saved = localStorage.getItem('akvrix_theme') || 'dark';
+    const saved = localStorage.getItem('akvrix_theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
     if (btn) {
         btn.innerHTML = saved === 'dark' ? '<i class="ri-sun-line"></i>' : '<i class="ri-moon-line"></i>';

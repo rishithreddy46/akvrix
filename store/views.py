@@ -1,23 +1,51 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.db import models
 from .models import Product, CartItem, Wishlist, Order, OrderItem, Review
 import json, random, string
+
 
 def get_session(request):
     if not request.session.session_key:
         request.session.create()
     return request.session.session_key
 
+
+def is_logged_in(request):
+    return request.user.is_authenticated
+
+
+def login_required_view(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not is_logged_in(request):
+            return redirect('/login/?next=' + request.path)
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 def cart_count(request):
     sk = get_session(request)
     return CartItem.objects.filter(session_key=sk).aggregate(total=models.Sum('quantity'))['total'] or 0
 
-def base_context(request):
-    return {'cart_count': cart_count(request)}
 
-# ===== PAGES =====
+def base_context(request):
+    user_name = ''
+    user_email = ''
+    if request.user.is_authenticated:
+        user_name = request.user.get_full_name() or request.user.username
+        user_email = request.user.email
+    return {
+        'cart_count': cart_count(request),
+        'is_logged_in': request.user.is_authenticated,
+        'user_name': user_name,
+        'user_email': user_email,
+    }
+
+
+# ===== PUBLIC PAGES =====
 
 def home(request):
     ctx = base_context(request)
@@ -32,6 +60,7 @@ def home(request):
     ]
     ctx['wishlist_ids'] = list(Wishlist.objects.filter(session_key=get_session(request)).values_list('product_id', flat=True))
     return render(request, 'store/home.html', ctx)
+
 
 def shop(request):
     ctx = base_context(request)
@@ -50,6 +79,7 @@ def shop(request):
     ctx['wishlist_ids'] = list(Wishlist.objects.filter(session_key=get_session(request)).values_list('product_id', flat=True))
     return render(request, 'store/shop.html', ctx)
 
+
 def product_detail(request, slug):
     ctx = base_context(request)
     p = get_object_or_404(Product, slug=slug)
@@ -59,6 +89,94 @@ def product_detail(request, slug):
     ctx['in_wishlist'] = Wishlist.objects.filter(session_key=get_session(request), product=p).exists()
     return render(request, 'store/product_detail.html', ctx)
 
+
+# ===== AUTH PAGES =====
+
+def login_page(request):
+    ctx = base_context(request)
+    if request.user.is_authenticated:
+        return redirect('/')
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        # Try to find user by email
+        try:
+            user_obj = User.objects.get(email=email)
+            user = authenticate(request, username=user_obj.username, password=password)
+        except User.DoesNotExist:
+            user = None
+        if user is not None:
+            login(request, user)
+            # Migrate session cart/wishlist to user
+            sk = get_session(request)
+            CartItem.objects.filter(session_key=sk, user__isnull=True).update(user=user)
+            Wishlist.objects.filter(session_key=sk, user__isnull=True).update(user=user)
+            next_url = request.GET.get('next', '/')
+            return redirect(next_url)
+        ctx['error'] = 'Invalid email or password. Please try again.'
+    return render(request, 'store/login.html', ctx)
+
+
+def register_page(request):
+    ctx = base_context(request)
+    if request.user.is_authenticated:
+        return redirect('/')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        confirm = request.POST.get('confirm_password', '')
+        if not all([name, email, password]):
+            ctx['error'] = 'All fields are required.'
+        elif password != confirm:
+            ctx['error'] = 'Passwords do not match.'
+        elif User.objects.filter(email=email).exists():
+            ctx['error'] = 'An account with this email already exists.'
+        else:
+            # Create Django user
+            username = email.split('@')[0]
+            # Ensure unique username
+            base_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            name_parts = name.split(' ', 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+            user = User.objects.create_user(
+                username=username, email=email, password=password,
+                first_name=first_name, last_name=last_name
+            )
+            login(request, user)
+            # Migrate session data
+            sk = get_session(request)
+            CartItem.objects.filter(session_key=sk, user__isnull=True).update(user=user)
+            Wishlist.objects.filter(session_key=sk, user__isnull=True).update(user=user)
+            next_url = request.GET.get('next', '/')
+            return redirect(next_url)
+    return render(request, 'store/register.html', ctx)
+
+
+def forgot_password_page(request):
+    ctx = base_context(request)
+    ctx['sent'] = False
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        if email:
+            ctx['sent'] = True
+            ctx['reset_email'] = email
+    return render(request, 'store/forgot_password.html', ctx)
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('/')
+
+
+# ===== PROTECTED PAGES =====
+
+@login_required_view
 def cart_page(request):
     ctx = base_context(request)
     items = CartItem.objects.filter(session_key=get_session(request)).select_related('product')
@@ -70,6 +188,8 @@ def cart_page(request):
     ctx['total'] = subtotal + shipping
     return render(request, 'store/cart.html', ctx)
 
+
+@login_required_view
 def checkout_page(request):
     ctx = base_context(request)
     items = CartItem.objects.filter(session_key=get_session(request)).select_related('product')
@@ -81,17 +201,38 @@ def checkout_page(request):
     ctx['total'] = subtotal + shipping
     return render(request, 'store/checkout.html', ctx)
 
-def login_page(request):
-    return render(request, 'store/login.html', base_context(request))
 
-def register_page(request):
-    return render(request, 'store/register.html', base_context(request))
+@login_required_view
+def wishlist_page(request):
+    ctx = base_context(request)
+    ctx['wishlist_items'] = Wishlist.objects.filter(session_key=get_session(request)).select_related('product')
+    return render(request, 'store/wishlist.html', ctx)
 
+
+@login_required_view
 def account_page(request):
     ctx = base_context(request)
     ctx['orders'] = Order.objects.filter(session_key=get_session(request)).order_by('-created_at')
     ctx['wishlist'] = Wishlist.objects.filter(session_key=get_session(request)).select_related('product')
     return render(request, 'store/account.html', ctx)
+
+
+@login_required_view
+def my_orders_page(request):
+    ctx = base_context(request)
+    ctx['orders'] = Order.objects.filter(session_key=get_session(request)).order_by('-created_at')
+    return render(request, 'store/my_orders.html', ctx)
+
+
+@login_required_view
+def order_detail_page(request, order_number):
+    ctx = base_context(request)
+    order = get_object_or_404(Order, order_number=order_number, session_key=get_session(request))
+    ctx['order'] = order
+    ctx['items'] = order.items.all().select_related('product')
+    ctx['tracking_steps'] = order.get_tracking_steps()
+    return render(request, 'store/order_detail.html', ctx)
+
 
 # ===== API ENDPOINTS =====
 
@@ -103,12 +244,16 @@ def add_to_cart(request):
     item, created = CartItem.objects.get_or_create(
         session_key=sk, product=product,
         size=data.get('size', 'M'), color=data.get('color', '#000'),
-        defaults={'quantity': data.get('quantity', 1)}
+        defaults={
+            'quantity': data.get('quantity', 1),
+            'user': request.user if request.user.is_authenticated else None,
+        }
     )
     if not created:
         item.quantity += data.get('quantity', 1)
         item.save()
     return JsonResponse({'success': True, 'cart_count': cart_count(request)})
+
 
 @require_POST
 def update_cart(request):
@@ -131,15 +276,20 @@ def update_cart(request):
         pass
     return JsonResponse({'success': True, 'cart_count': cart_count(request)})
 
+
 @require_POST
 def toggle_wishlist(request):
     data = json.loads(request.body)
     sk = get_session(request)
     product = get_object_or_404(Product, id=data['product_id'])
-    wl, created = Wishlist.objects.get_or_create(session_key=sk, product=product)
+    wl, created = Wishlist.objects.get_or_create(
+        session_key=sk, product=product,
+        defaults={'user': request.user if request.user.is_authenticated else None}
+    )
     if not created:
         wl.delete()
     return JsonResponse({'success': True, 'added': created})
+
 
 @require_POST
 def place_order(request):
@@ -152,13 +302,15 @@ def place_order(request):
     shipping = 0 if subtotal > 150 else 12
     order_num = 'AKV-' + ''.join(random.choices(string.digits, k=6))
     order = Order.objects.create(
-        session_key=sk, order_number=order_num,
-        first_name=data.get('first_name',''), last_name=data.get('last_name',''),
-        email=data.get('email',''), phone=data.get('phone',''),
-        address=data.get('address',''), city=data.get('city',''),
-        state=data.get('state',''), zip_code=data.get('zip_code',''),
-        country=data.get('country','India'), payment_method=data.get('payment_method','card'),
-        subtotal=subtotal, shipping=shipping, total=subtotal+shipping
+        session_key=sk,
+        user=request.user if request.user.is_authenticated else None,
+        order_number=order_num,
+        first_name=data.get('first_name', ''), last_name=data.get('last_name', ''),
+        email=data.get('email', ''), phone=data.get('phone', ''),
+        address=data.get('address', ''), city=data.get('city', ''),
+        state=data.get('state', ''), zip_code=data.get('zip_code', ''),
+        country=data.get('country', 'India'), payment_method=data.get('payment_method', 'card'),
+        subtotal=subtotal, shipping=shipping, total=subtotal + shipping
     )
     for item in items:
         OrderItem.objects.create(

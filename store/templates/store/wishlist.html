@@ -1,0 +1,88 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}Wishlist — AKVRIX{% endblock %}
+{% block nav_class %}scrolled{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>My Wishlist</h1>
+    <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <span>Wishlist</span></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    {% if wishlist_items %}
+    <p style="color:var(--text-secondary);margin-bottom:2rem">{{ wishlist_items|length }} item{{ wishlist_items|length|pluralize }} saved</p>
+    <div class="products-grid">
+      {% for w in wishlist_items %}
+      <div class="product-card" data-aos="fade-up" id="wishlist-item-{{ w.product.id }}">
+        <div class="product-img-wrap">
+          {% if w.product.badge %}
+          <span class="product-badge {% if w.product.badge == 'Limited' %}limited{% elif w.product.badge == 'New' %}new{% endif %}">{{ w.product.badge }}</span>
+          {% endif %}
+          <div class="product-wish">
+            <button class="active" onclick="removeFromWishlist({{ w.product.id }}, this)"><i class="ri-heart-fill"></i></button>
+          </div>
+          <a href="{% url 'product_detail' w.product.slug %}">
+            <img src="{{ w.product.image }}" alt="{{ w.product.name }}" class="img-main">
+            {% if w.product.image_hover %}
+            <img src="{{ w.product.image_hover }}" alt="{{ w.product.name }}" class="img-hover">
+            {% endif %}
+          </a>
+        </div>
+        <div class="product-info">
+          <h3><a href="{% url 'product_detail' w.product.slug %}">{{ w.product.name }}</a></h3>
+          <div class="product-price">
+            <span class="current">₹{{ w.product.price }}</span>
+            {% if w.product.old_price %}
+            <span class="old">₹{{ w.product.old_price }}</span>
+            <span class="discount">-{{ w.product.discount_percent }}%</span>
+            {% endif %}
+          </div>
+          <div class="product-rating">{{ w.product.rating }} <i class="ri-star-fill"></i> <span>({{ w.product.reviews_count }})</span></div>
+          <div class="product-actions">
+            <a href="{% url 'product_detail' w.product.slug %}" class="btn btn-primary btn-sm btn-full">View Product</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="ri-heart-line" style="font-size:4rem;color:var(--text-muted);margin-bottom:1rem"></i>
+      <h2>Your Wishlist is Empty</h2>
+      <p style="color:var(--text-secondary);margin:1rem 0 2rem">Save items you love to your wishlist and they'll appear here.</p>
+      <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Explore Products</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+async function removeFromWishlist(productId, btn) {
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const res = await fetch('/api/wishlist/toggle/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
+    body: JSON.stringify({product_id: productId})
+  });
+  if (res.ok) {
+    const card = document.getElementById('wishlist-item-' + productId);
+    if (card) {
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.9)';
+      card.style.transition = 'all 0.3s ease';
+      setTimeout(() => {
+        card.remove();
+        const grid = document.querySelector('.products-grid');
+        if (grid && grid.children.length === 0) {
+          location.reload();
+        }
+      }, 300);
+    }
+  }
+}
+</script>
+{% endblock %}

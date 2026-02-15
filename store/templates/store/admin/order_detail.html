@@ -1,0 +1,80 @@
+{% extends 'store/admin/base.html' %}
+{% block title %}Order {{ order.order_number }}{% endblock %}
+{% block page_title %}Order {{ order.order_number }}{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;max-width:1000px">
+<div>
+<div class="card">
+<div class="card-header"><h2>Order Items</h2></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Product</th><th>Size</th><th>Color</th><th>Qty</th><th>Price</th></tr></thead>
+<tbody>
+{% for item in items %}
+<tr>
+<td style="display:flex;align-items:center;gap:.75rem">
+{% if item.product %}<img src="{{ item.product.image }}" alt="">{% endif %}
+{{ item.product_name }}
+</td>
+<td>{{ item.size }}</td>
+<td><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:{{ item.color }};border:1px solid #ddd"></span></td>
+<td>{{ item.quantity }}</td>
+<td style="font-weight:600">&#8377;{{ item.price }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+<!-- Tracking Progress -->
+<div class="card" style="margin-top:1rem">
+<div class="card-header"><h2>Tracking Progress</h2></div>
+<div style="padding:1.5rem;display:flex;gap:.5rem;align-items:center">
+{% for step in tracking_steps %}
+<div style="flex:1;text-align:center">
+<div style="width:36px;height:36px;border-radius:50%;margin:0 auto .4rem;display:flex;align-items:center;justify-content:center;font-size:.9rem;
+{% if step.completed %}background:#1a1a2e;color:#fff{% else %}background:#f0f0f0;color:#999{% endif %}"><i class="{{ step.icon }}"></i></div>
+<p style="font-size:.68rem;font-weight:{% if step.active %}700{% else %}400{% endif %}">{{ step.label }}</p>
+</div>
+{% if not forloop.last %}<div style="flex:.5;height:2px;{% if step.completed and not step.active %}background:#1a1a2e{% else %}background:#e0e0e0{% endif %}"></div>{% endif %}
+{% endfor %}
+</div>
+</div>
+</div>
+<div>
+<div class="card" style="padding:1.5rem">
+<h3 style="font-size:.9rem;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em;color:#888">Customer Info</h3>
+<p style="font-weight:600">{{ order.first_name }} {{ order.last_name }}</p>
+<p style="font-size:.85rem;color:#666;margin-top:.25rem">{{ order.email }}</p>
+<p style="font-size:.85rem;color:#666">{{ order.phone }}</p>
+{% if order.user %}<p style="font-size:.78rem;color:#888;margin-top:.5rem"><i class="ri-user-line"></i> User: {{ order.user.username }}</p>{% endif %}
+<hr style="margin:1rem 0;border:none;border-top:1px solid #f0f0f0">
+<h3 style="font-size:.9rem;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;color:#888">Shipping</h3>
+<p style="font-size:.85rem;color:#555;line-height:1.6">{{ order.address }}<br>{{ order.city }}, {{ order.state }} {{ order.zip_code }}<br>{{ order.country }}</p>
+<hr style="margin:1rem 0;border:none;border-top:1px solid #f0f0f0">
+<h3 style="font-size:.9rem;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;color:#888">Summary</h3>
+<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.35rem"><span>Subtotal</span><span>&#8377;{{ order.subtotal }}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.35rem"><span>Shipping</span><span>&#8377;{{ order.shipping }}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;margin-top:.75rem;padding-top:.75rem;border-top:1px solid #f0f0f0"><span>Total</span><span>&#8377;{{ order.total }}</span></div>
+<hr style="margin:1rem 0;border:none;border-top:1px solid #f0f0f0">
+<h3 style="font-size:.9rem;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;color:#888">Update Order</h3>
+<form method="POST">
+{% csrf_token %}
+<div class="form-group"><label>Status</label>
+<select name="status">
+{% for val, label in status_choices %}
+<option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select></div>
+<div class="form-group"><label>Tracking Number</label>
+<input type="text" name="tracking_number" value="{{ order.tracking_number }}" placeholder="e.g. DHLV1234567890"></div>
+<div class="form-group"><label>Carrier</label>
+<input type="text" name="carrier" value="{{ order.carrier }}" placeholder="e.g. Delhivery, BlueDart"></div>
+<div class="form-group"><label>Estimated Delivery</label>
+<input type="date" name="estimated_delivery" value="{{ order.estimated_delivery|date:'Y-m-d' }}"></div>
+<button type="submit" class="btn btn-primary" style="width:100%"><i class="ri-save-line"></i> Save Changes</button>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}
