@@ -121,7 +121,7 @@ def login_page(request):
         if user is None:
             user = authenticate(request, username=identifier, password=password)
         if user is not None:
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             # Migrate session cart/wishlist to user
             sk = get_session(request)
             CartItem.objects.filter(session_key=sk, user__isnull=True).update(user=user)
@@ -162,7 +162,7 @@ def register_page(request):
                 username=username, email=email, password=password,
                 first_name=first_name, last_name=last_name
             )
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             sk = get_session(request)
             CartItem.objects.filter(session_key=sk, user__isnull=True).update(user=user)
             Wishlist.objects.filter(session_key=sk, user__isnull=True).update(user=user)
