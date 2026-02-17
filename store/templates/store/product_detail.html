@@ -58,7 +58,8 @@
                     <label>Size</label>
                     <div class="size-options" id="sizeOptions">
                         {% for s in product.get_sizes_list %}
-                        <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}" onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{ s }}</button>
+                        <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}"
+                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{ s }}</button>
                         {% endfor %}
                     </div>
 
@@ -89,7 +90,7 @@
                     <button class="btn btn-primary btn-lg" onclick="addToCartDetail()"><i
                             class="ri-shopping-bag-line"></i> Add to Cart</button>
                     <button class="btn btn-outline btn-lg" onclick="toggleWishlistAPI({{ product.id }}, this)"><i
-                            class="ri-heart-line"></i></button>
+                            class="ri-heart-line"></i> Add to Wishlist</button>
                 </div>
 
                 <!-- Features -->

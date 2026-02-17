@@ -12,8 +12,7 @@ python manage.py seed_data
 # Create/reset single superuser — Akhil / Akhil@123
 python manage.py shell -c "
 from django.contrib.auth.models import User
-# Delete ALL users except Akhil
-User.objects.exclude(username='Akhil').delete()
+# Ensure Akhil superuser exists with correct password
 if not User.objects.filter(username='Akhil').exists():
     User.objects.create_superuser('Akhil', 'akhil@akvrix.com', 'Akhil@123', first_name='Akhil')
     print('Superuser created: Akhil')
@@ -25,7 +24,7 @@ else:
     u.email = 'akhil@akvrix.com'
     u.first_name = 'Akhil'
     u.save()
-    print('Superuser Akhil reset with password Akhil@123')
+    print('Superuser Akhil password reset')
 "
 
 # Ensure django.contrib.sites has a Site with SITE_ID=1
