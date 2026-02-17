@@ -73,7 +73,7 @@ WSGI_APPLICATION = 'akvrix_project.wsgi.application'
 # Database
 DATABASES = {
     'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        default='postgres://localhost:5432/akvrix_db',
         conn_max_age=600,
     )
 }
