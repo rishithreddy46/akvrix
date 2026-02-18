@@ -7,7 +7,8 @@
 {% block content %}
 <div class="page-header">
     <div class="container">
-        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{ product.name }}</span></div>
+        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{
+                product.name }}</span></div>
     </div>
 </div>
 
@@ -59,7 +60,8 @@
                     <div class="size-options" id="sizeOptions">
                         {% for s in product.get_sizes_list %}
                         <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}"
-                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{ s }}</button>
+                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{
+                            s }}</button>
                         {% endfor %}
                     </div>
 
@@ -121,19 +123,53 @@
                     </div>
                 </div>
                 <div class="review-stars">
-                    <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
-                        class="ri-star-fill"></i>
-                    {% if r.rating >= 5 %}
-                    <i class="ri-star-fill"></i>
-                    {% else %}
-                    <i class="ri-star-half-fill"></i>
-                    {% endif %}
+                    {% for i in "12345" %}
+                    {% if forloop.counter <= r.rating %}<i class="ri-star-fill"></i>{% else %}<i class="ri-star-line"
+                            style="opacity:.3"></i>{% endif %}
+                        {% endfor %}
                 </div>
                 <p class="review-text">{{ r.text }}</p>
             </div>
             {% empty %}
             <p style="color:var(--text-secondary)">No reviews yet. Be the first to review this product!</p>
             {% endfor %}
+
+            <!-- Write Review Form -->
+            {% if is_logged_in %}
+            <div class="write-review-section"
+                style="margin-top:2rem;padding:1.5rem;background:var(--card-bg);border:1px solid var(--border);border-radius:12px">
+                <h4 style="font-size:1.1rem;text-transform:uppercase;margin-bottom:1rem;letter-spacing:.05em">Write a
+                    Review</h4>
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;font-size:.85rem;color:var(--text-secondary);margin-bottom:.4rem">Your
+                        Rating</label>
+                    <div class="star-rating-input" style="display:flex;gap:.3rem;font-size:1.5rem;cursor:pointer"
+                        id="starRatingInput">
+                        <i class="ri-star-line" data-star="1" onclick="setReviewStars(1)"></i>
+                        <i class="ri-star-line" data-star="2" onclick="setReviewStars(2)"></i>
+                        <i class="ri-star-line" data-star="3" onclick="setReviewStars(3)"></i>
+                        <i class="ri-star-line" data-star="4" onclick="setReviewStars(4)"></i>
+                        <i class="ri-star-line" data-star="5" onclick="setReviewStars(5)"></i>
+                    </div>
+                </div>
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;font-size:.85rem;color:var(--text-secondary);margin-bottom:.4rem">Your
+                        Review</label>
+                    <textarea id="reviewText" rows="4" placeholder="Share your experience with this product..."
+                        style="width:100%;padding:.8rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.9rem;resize:vertical;font-family:inherit"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="submitReview()" id="submitReviewBtn">
+                    <i class="ri-send-plane-line"></i> Submit Review
+                </button>
+                <div id="reviewMsg" style="margin-top:.8rem;font-size:.85rem;display:none"></div>
+            </div>
+            {% else %}
+            <div
+                style="margin-top:1.5rem;padding:1rem;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;text-align:center">
+                <p style="color:var(--text-secondary);margin:0"><a href="/login/?next={{ request.path }}"
+                        style="color:var(--accent);text-decoration:underline">Sign in</a> to write a review</p>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Related -->
@@ -194,5 +230,94 @@
         mainImg.style.transform = 'scale(1.8)';
     });
     gallery.addEventListener('mouseleave', () => { mainImg.style.transform = 'scale(1)'; });
+
+    // Review submission
+    let reviewRating = 0;
+
+    function setReviewStars(n) {
+        reviewRating = n;
+        const stars = document.querySelectorAll('#starRatingInput i');
+        stars.forEach((s, i) => {
+            s.className = i < n ? 'ri-star-fill' : 'ri-star-line';
+            s.style.color = i < n ? '#ff9800' : 'var(--text-secondary)';
+        });
+    }
+
+    // Hover effect for stars
+    const starContainer = document.getElementById('starRatingInput');
+    if (starContainer) {
+        starContainer.querySelectorAll('i').forEach(star => {
+            star.addEventListener('mouseenter', function () {
+                const n = parseInt(this.dataset.star);
+                starContainer.querySelectorAll('i').forEach((s, i) => {
+                    s.className = i < n ? 'ri-star-fill' : 'ri-star-line';
+                    s.style.color = i < n ? '#ff9800' : 'var(--text-secondary)';
+                });
+            });
+        });
+        starContainer.addEventListener('mouseleave', () => {
+            starContainer.querySelectorAll('i').forEach((s, i) => {
+                s.className = i < reviewRating ? 'ri-star-fill' : 'ri-star-line';
+                s.style.color = i < reviewRating ? '#ff9800' : 'var(--text-secondary)';
+            });
+        });
+    }
+
+    async function submitReview() {
+        const text = document.getElementById('reviewText').value.trim();
+        const msg = document.getElementById('reviewMsg');
+        const btn = document.getElementById('submitReviewBtn');
+
+        if (reviewRating === 0) {
+            msg.style.display = 'block';
+            msg.style.color = '#e53e3e';
+            msg.textContent = 'Please select a rating.';
+            return;
+        }
+        if (!text) {
+            msg.style.display = 'block';
+            msg.style.color = '#e53e3e';
+            msg.textContent = 'Please write a review.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line"></i> Submitting...';
+
+        try {
+            const res = await fetch('/api/review/{{ product.slug }}/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken')
+                },
+                body: JSON.stringify({ rating: reviewRating, text: text })
+            });
+            const data = await res.json();
+            if (data.success) {
+                msg.style.display = 'block';
+                msg.style.color = '#38a169';
+                msg.textContent = 'Review submitted successfully!';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                msg.style.display = 'block';
+                msg.style.color = '#e53e3e';
+                msg.textContent = data.error || 'Failed to submit review.';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-send-plane-line"></i> Submit Review';
+            }
+        } catch (err) {
+            msg.style.display = 'block';
+            msg.style.color = '#e53e3e';
+            msg.textContent = 'Network error. Please try again.';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-send-plane-line"></i> Submit Review';
+        }
+    }
+
+    function getCookie(name) {
+        const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return v ? v.pop() : '';
+    }
 </script>
 {% endblock %}

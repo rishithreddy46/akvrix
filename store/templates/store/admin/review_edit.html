@@ -1,0 +1,63 @@
+{% extends 'store/admin/base.html' %}
+{% block title %}Edit Review{% endblock %}
+{% block page_title %}Edit Review{% endblock %}
+{% block content %}
+<div class="card" style="max-width:700px">
+    <div class="card-header">
+        <h2>Edit Review for "{{ review.product.name }}"</h2>
+    </div>
+    <div style="padding:1.5rem">
+        <form method="POST">
+            {% csrf_token %}
+            <div style="margin-bottom:1.2rem">
+                <label style="display:block;font-weight:600;margin-bottom:.4rem;font-size:.85rem;color:#333">Reviewer
+                    Name</label>
+                <input type="text" name="name" value="{{ review.name }}" required
+                    style="width:100%;padding:.6rem .8rem;border:1px solid #ddd;border-radius:8px;font-size:.9rem">
+            </div>
+            <div style="margin-bottom:1.2rem">
+                <label
+                    style="display:block;font-weight:600;margin-bottom:.4rem;font-size:.85rem;color:#333">Rating</label>
+                <div id="editStarContainer" style="display:flex;gap:.5rem;align-items:center">
+                    <input type="hidden" name="rating" id="ratingInput" value="{{ review.rating }}">
+                    <i class="ri-star-line" data-v="1" onclick="pickStar(1)"
+                        style="font-size:1.5rem;cursor:pointer;color:#ff9800"></i>
+                    <i class="ri-star-line" data-v="2" onclick="pickStar(2)"
+                        style="font-size:1.5rem;cursor:pointer;color:#ff9800"></i>
+                    <i class="ri-star-line" data-v="3" onclick="pickStar(3)"
+                        style="font-size:1.5rem;cursor:pointer;color:#ff9800"></i>
+                    <i class="ri-star-line" data-v="4" onclick="pickStar(4)"
+                        style="font-size:1.5rem;cursor:pointer;color:#ff9800"></i>
+                    <i class="ri-star-line" data-v="5" onclick="pickStar(5)"
+                        style="font-size:1.5rem;cursor:pointer;color:#ff9800"></i>
+                </div>
+            </div>
+            <div style="margin-bottom:1.5rem">
+                <label style="display:block;font-weight:600;margin-bottom:.4rem;font-size:.85rem;color:#333">Review
+                    Text</label>
+                <textarea name="text" rows="5" required
+                    style="width:100%;padding:.6rem .8rem;border:1px solid #ddd;border-radius:8px;font-size:.9rem;resize:vertical">{{ review.text }}</textarea>
+            </div>
+            <div style="display:flex;gap:.8rem">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'admin_reviews' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function pickStar(n) {
+        document.getElementById('ratingInput').value = n;
+        renderStars(n);
+    }
+    function renderStars(n) {
+        document.querySelectorAll('#editStarContainer i').forEach(function (s) {
+            var v = parseInt(s.getAttribute('data-v'));
+            s.className = v <= n ? 'ri-star-fill' : 'ri-star-line';
+        });
+    }
+    // init on load
+    renderStars({{ review.rating }});
+</script>
+{% endblock %}

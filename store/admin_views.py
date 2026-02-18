@@ -161,6 +161,19 @@ def admin_reviews(request):
 
 
 @admin_required
+def admin_review_edit(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    if request.method == 'POST':
+        review.name = request.POST.get('name', review.name).strip()
+        review.rating = int(request.POST.get('rating', review.rating))
+        review.text = request.POST.get('text', review.text).strip()
+        review.save()
+        return redirect('admin_reviews')
+    ctx = {'review': review}
+    return render(request, 'store/admin/review_edit.html', ctx)
+
+
+@admin_required
 @require_POST
 def admin_review_delete(request, review_id):
     review = get_object_or_404(Review, id=review_id)

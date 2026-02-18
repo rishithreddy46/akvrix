@@ -37,6 +37,9 @@ urlpatterns = [
     path('dashboard/orders/', admin_views.admin_orders, name='admin_orders'),
     path('dashboard/orders/<int:order_id>/', admin_views.admin_order_detail, name='admin_order_detail'),
     path('dashboard/reviews/', admin_views.admin_reviews, name='admin_reviews'),
+    path('dashboard/reviews/<int:review_id>/edit/', admin_views.admin_review_edit, name='admin_review_edit'),
     path('dashboard/reviews/<int:review_id>/delete/', admin_views.admin_review_delete, name='admin_review_delete'),
     path('dashboard/customers/', admin_views.admin_customers, name='admin_customers'),
+    # Review API
+    path('api/review/<slug:slug>/', views.submit_review, name='submit_review'),
 ]

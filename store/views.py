@@ -395,3 +395,33 @@ def place_order(request):
         )
     items.delete()
     return JsonResponse({'success': True, 'order_number': order_num})
+
+
+# ===== REVIEWS =====
+
+@login_required_view
+@require_POST
+def submit_review(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    try:
+        data = json.loads(request.body)
+        rating = int(data.get('rating', 0))
+        text = data.get('text', '').strip()
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'success': False, 'error': 'Invalid data'}, status=400)
+
+    if not (1 <= rating <= 5):
+        return JsonResponse({'success': False, 'error': 'Rating must be 1-5'}, status=400)
+    if not text:
+        return JsonResponse({'success': False, 'error': 'Review text is required'}, status=400)
+
+    name = request.user.get_full_name() or request.user.username
+    Review.objects.create(
+        product=product,
+        user=request.user,
+        name=name,
+        rating=rating,
+        text=text,
+    )
+    return JsonResponse({'success': True})
+
