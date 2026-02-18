@@ -4,7 +4,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.db import models
-from .models import Product, CartItem, Wishlist, Order, OrderItem, Review
+from .models import Product, CartItem, Wishlist, Order, OrderItem, Review, Address
 import json, random, string
 
 
@@ -96,8 +96,10 @@ def product_detail(request, slug):
     ctx['reviews'] = p.reviews.all().order_by('-created_at')
     if request.user.is_authenticated:
         ctx['in_wishlist'] = Wishlist.objects.filter(user=request.user, product=p).exists()
+        ctx['has_reviewed'] = Review.objects.filter(user=request.user, product=p).exists()
     else:
         ctx['in_wishlist'] = Wishlist.objects.filter(session_key=get_session(request), product=p).exists()
+        ctx['has_reviewed'] = False
     return render(request, 'store/product_detail.html', ctx)
 
 
@@ -212,6 +214,7 @@ def checkout_page(request):
     ctx['subtotal'] = subtotal
     ctx['shipping'] = shipping
     ctx['total'] = subtotal + shipping
+    ctx['addresses'] = Address.objects.filter(user=request.user)
     return render(request, 'store/checkout.html', ctx)
 
 
@@ -228,6 +231,7 @@ def account_page(request):
     ctx['user'] = request.user
     ctx['orders'] = Order.objects.filter(user=request.user).order_by('-created_at')
     ctx['wishlist'] = Wishlist.objects.filter(user=request.user).select_related('product')
+    ctx['addresses'] = Address.objects.filter(user=request.user)
     return render(request, 'store/account.html', ctx)
 
 
@@ -403,6 +407,9 @@ def place_order(request):
 @require_POST
 def submit_review(request, slug):
     product = get_object_or_404(Product, slug=slug)
+    # One review per user per product
+    if Review.objects.filter(user=request.user, product=product).exists():
+        return JsonResponse({'success': False, 'error': 'You have already reviewed this product.'}, status=400)
     try:
         data = json.loads(request.body)
         rating = int(data.get('rating', 0))
@@ -423,5 +430,71 @@ def submit_review(request, slug):
         rating=rating,
         text=text,
     )
+    return JsonResponse({'success': True})
+
+
+# ===== ADDRESSES =====
+
+@login_required_view
+def address_list(request):
+    addrs = Address.objects.filter(user=request.user)
+    data = [{
+        'id': a.id, 'label': a.label, 'full_name': a.full_name,
+        'phone': a.phone, 'address_line': a.address_line,
+        'city': a.city, 'state': a.state, 'pincode': a.pincode,
+        'is_default': a.is_default,
+    } for a in addrs]
+    return JsonResponse({'success': True, 'addresses': data})
+
+
+@login_required_view
+@require_POST
+def address_save(request):
+    data = json.loads(request.body)
+    addr_id = data.get('id')
+    if addr_id:
+        addr = get_object_or_404(Address, id=addr_id, user=request.user)
+    else:
+        addr = Address(user=request.user)
+    addr.label = data.get('label', 'home')
+    addr.full_name = data.get('full_name', '').strip()
+    addr.phone = data.get('phone', '').strip()
+    addr.address_line = data.get('address_line', '').strip()
+    addr.city = data.get('city', '').strip()
+    addr.state = data.get('state', '').strip()
+    addr.pincode = data.get('pincode', '').strip()
+    if not all([addr.full_name, addr.phone, addr.address_line, addr.city, addr.state, addr.pincode]):
+        return JsonResponse({'success': False, 'error': 'All fields are required.'})
+    is_default = data.get('is_default', False)
+    if is_default:
+        Address.objects.filter(user=request.user).update(is_default=False)
+        addr.is_default = True
+    elif not Address.objects.filter(user=request.user).exclude(id=addr.id if addr.id else 0).exists():
+        addr.is_default = True
+    addr.save()
+    return JsonResponse({'success': True, 'id': addr.id})
+
+
+@login_required_view
+@require_POST
+def address_delete(request, address_id):
+    addr = get_object_or_404(Address, id=address_id, user=request.user)
+    was_default = addr.is_default
+    addr.delete()
+    if was_default:
+        first = Address.objects.filter(user=request.user).first()
+        if first:
+            first.is_default = True
+            first.save()
+    return JsonResponse({'success': True})
+
+
+@login_required_view
+@require_POST
+def address_set_default(request, address_id):
+    addr = get_object_or_404(Address, id=address_id, user=request.user)
+    Address.objects.filter(user=request.user).update(is_default=False)
+    addr.is_default = True
+    addr.save()
     return JsonResponse({'success': True})
 

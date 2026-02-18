@@ -3,25 +3,110 @@
 {% block page_title %}Customers{% endblock %}
 {% block content %}
 <div class="card">
-<div class="card-header"><h2>Registered Users ({{ customers|length }})</h2></div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Orders</th><th>Total Spent</th><th>Joined</th></tr></thead>
-<tbody>
-{% for c in customers %}
-<tr>
-<td style="font-weight:600">{{ c.user.get_full_name|default:c.user.username }}</td>
-<td>{{ c.user.email }}</td>
-<td style="color:#888">{{ c.user.username }}</td>
-<td>{{ c.order_count }}</td>
-<td style="font-weight:600">&#8377;{{ c.total_spent }}</td>
-<td style="font-size:.8rem;color:#888">{{ c.user.date_joined|date:"M d, Y" }}</td>
-</tr>
-{% empty %}
-<tr><td colspan="6" style="text-align:center;color:#888;padding:2rem">No customers yet</td></tr>
-{% endfor %}
-</tbody>
-</table>
+    <div class="card-header">
+        <h2>Registered Users ({{ customers|length }})</h2>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Orders</th>
+                    <th>Total Spent</th>
+                    <th>Joined</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in customers %}
+                <tr>
+                    <td style="font-weight:600">{{ c.user.get_full_name|default:c.user.username }}</td>
+                    <td>{{ c.user.email }}</td>
+                    <td style="color:#888">{{ c.user.username }}</td>
+                    <td>{{ c.order_count }}</td>
+                    <td style="font-weight:600">&#8377;{{ c.total_spent }}</td>
+                    <td style="font-size:.8rem;color:#888">{{ c.user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        <button onclick="toggleDetails('details-{{ c.user.id }}')"
+                            style="background:var(--accent);color:#000;border:none;padding:.35rem .8rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600">
+                            <i class="ri-eye-line"></i> View Details
+                        </button>
+                    </td>
+                </tr>
+                <tr id="details-{{ c.user.id }}" style="display:none">
+                    <td colspan="7"
+                        style="padding:1rem;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06)">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+                            <!-- Addresses -->
+                            <div>
+                                <h4
+                                    style="font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem;color:var(--accent)">
+                                    <i class="ri-map-pin-line"></i> Addresses ({{ c.addresses|length }})
+                                </h4>
+                                {% for addr in c.addresses %}
+                                <div
+                                    style="padding:.6rem;margin-bottom:.5rem;background:rgba(255,255,255,.04);border-radius:8px;font-size:.82rem">
+                                    <span
+                                        style="background:var(--accent);color:#000;padding:.1rem .5rem;border-radius:12px;font-size:.68rem;font-weight:600">{{ addr.get_label_display }}</span>
+                                    {% if addr.is_default %}<span
+                                        style="font-size:.65rem;color:var(--accent);margin-left:.3rem">DEFAULT</span>{% endif %}
+                                    <p style="margin:.3rem 0 0;font-weight:600">{{ addr.full_name }} · {{ addr.phone }}
+                                    </p>
+                                    <p style="margin:.1rem 0 0;color:#888">{{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} — {{ addr.pincode }}</p>
+                                </div>
+                                {% empty %}
+                                <p style="font-size:.82rem;color:#888">No addresses saved</p>
+                                {% endfor %}
+                            </div>
+                            <!-- Recent Orders & Stats -->
+                            <div>
+                                <h4
+                                    style="font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem;color:var(--accent)">
+                                    <i class="ri-shopping-bag-line"></i> Recent Orders
+                                </h4>
+                                {% for o in c.recent_orders %}
+                                <div
+                                    style="padding:.5rem;margin-bottom:.4rem;background:rgba(255,255,255,.04);border-radius:8px;font-size:.82rem;display:flex;justify-content:space-between;align-items:center">
+                                    <div>
+                                        <span style="font-weight:600">{{ o.order_number }}</span>
+                                        <span style="color:#888;margin-left:.4rem">{{ o.created_at|date:"M d" }}</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-weight:600">&#8377;{{ o.total }}</span>
+                                        <span
+                                            style="margin-left:.4rem;padding:.1rem .5rem;border-radius:10px;font-size:.68rem;background:{% if o.status == 'delivered' %}rgba(0,200,100,.15);color:#0c6{% elif o.status == 'cancelled' %}rgba(255,60,60,.15);color:#f44{% else %}rgba(255,180,0,.15);color:#fb0{% endif %}">{{ o.get_status_display }}</span>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p style="font-size:.82rem;color:#888">No orders yet</p>
+                                {% endfor %}
+                                <div
+                                    style="margin-top:.8rem;padding:.5rem;background:rgba(255,255,255,.04);border-radius:8px;font-size:.82rem">
+                                    <i class="ri-heart-line" style="color:var(--accent)"></i> Wishlist items: <strong>{{ c.wishlist_count }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center;color:#888;padding:2rem">No customers yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-</div>
+<script>
+    function toggleDetails(id) {
+        const row = document.getElementById(id);
+        if (row.style.display === 'none') {
+            row.style.display = 'table-row';
+        } else {
+            row.style.display = 'none';
+        }
+    }
+</script>
 {% endblock %}

@@ -149,6 +149,32 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = ('user', 'product')
 
     def __str__(self):
         return f"{self.name} - {self.product.name}"
+
+
+class Address(models.Model):
+    LABEL_CHOICES = [
+        ('home', 'Home'),
+        ('work', 'Work'),
+        ('other', 'Other'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    label = models.CharField(max_length=20, choices=LABEL_CHOICES, default='home')
+    full_name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20)
+    address_line = models.TextField()
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=10)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_default', '-created_at']
+
+    def __str__(self):
+        return f"{self.label.title()} - {self.full_name} ({self.city})"
+

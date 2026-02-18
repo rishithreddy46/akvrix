@@ -42,4 +42,9 @@ urlpatterns = [
     path('dashboard/customers/', admin_views.admin_customers, name='admin_customers'),
     # Review API
     path('api/review/<slug:slug>/', views.submit_review, name='submit_review'),
+    # Address APIs
+    path('api/addresses/', views.address_list, name='address_list'),
+    path('api/address/save/', views.address_save, name='address_save'),
+    path('api/address/<int:address_id>/delete/', views.address_delete, name='address_delete'),
+    path('api/address/<int:address_id>/default/', views.address_set_default, name='address_set_default'),
 ]

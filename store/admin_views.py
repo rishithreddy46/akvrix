@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db.models import Sum, Count
-from .models import Product, CartItem, Wishlist, Order, OrderItem, Review
+from .models import Product, CartItem, Wishlist, Order, OrderItem, Review, Address
 import json
 
 
@@ -188,10 +188,16 @@ def admin_customers(request):
     for c in customers:
         orders = Order.objects.filter(user=c)
         total_spent = orders.aggregate(t=Sum('total'))['t'] or 0
+        addresses = Address.objects.filter(user=c)
+        recent_orders = orders.order_by('-created_at')[:3]
+        wishlist_count = Wishlist.objects.filter(user=c).count()
         customer_data.append({
             'user': c,
             'order_count': orders.count(),
             'total_spent': total_spent,
+            'addresses': addresses,
+            'recent_orders': recent_orders,
+            'wishlist_count': wishlist_count,
         })
     ctx = {'customers': customer_data}
     return render(request, 'store/admin/customers.html', ctx)

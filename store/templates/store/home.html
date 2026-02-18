@@ -103,8 +103,7 @@
                         <span class="discount">-{{ p.discount_percent }}%</span>
                         {% endif %}
                     </div>
-                    <div class="product-rating">{{ p.rating }} <i class="ri-star-fill"></i> <span>({{ p.reviews_count
-                            }})</span></div>
+                    <div class="product-rating">{{ p.rating }} <i class="ri-star-fill"></i> <span>({{ p.reviews_count }})</span></div>
                     <div class="product-actions">
                         <a href="{% url 'product_detail' p.slug %}" class="btn btn-primary btn-sm btn-full">View
                             Product</a>

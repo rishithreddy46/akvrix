@@ -7,8 +7,7 @@
 {% block content %}
 <div class="page-header">
     <div class="container">
-        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{
-                product.name }}</span></div>
+        <div class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'shop' %}">Shop</a> / <span>{{ product.name }}</span></div>
     </div>
 </div>
 
@@ -60,8 +59,7 @@
                     <div class="size-options" id="sizeOptions">
                         {% for s in product.get_sizes_list %}
                         <button class="size-btn {% if forloop.counter == 2 %}active{% endif %}"
-                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{
-                            s }}</button>
+                            onclick="document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');selectedSize='{{ s }}'">{{ s }}</button>
                         {% endfor %}
                     </div>
 
@@ -136,6 +134,14 @@
 
             <!-- Write Review Form -->
             {% if is_logged_in %}
+            {% if has_reviewed %}
+            <div
+                style="margin-top:1.5rem;padding:1.2rem;background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.2);border-radius:10px;text-align:center">
+                <i class="ri-checkbox-circle-fill" style="font-size:1.3rem;color:#0c6;margin-right:.4rem"></i>
+                <span style="color:#0c6;font-weight:600;font-size:.9rem">You've already reviewed this product. Thank
+                    you!</span>
+            </div>
+            {% else %}
             <div class="write-review-section"
                 style="margin-top:2rem;padding:1.5rem;background:var(--card-bg);border:1px solid var(--border);border-radius:12px">
                 <h4 style="font-size:1.1rem;text-transform:uppercase;margin-bottom:1rem;letter-spacing:.05em">Write a
@@ -163,6 +169,7 @@
                 </button>
                 <div id="reviewMsg" style="margin-top:.8rem;font-size:.85rem;display:none"></div>
             </div>
+            {% endif %}
             {% else %}
             <div
                 style="margin-top:1.5rem;padding:1rem;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;text-align:center">

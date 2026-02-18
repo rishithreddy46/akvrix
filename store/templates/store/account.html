@@ -4,6 +4,7 @@
 {% block nav_class %}scrolled{% endblock %}
 
 {% block content %}
+<form id="csrfForm" style="display:none">{% csrf_token %}</form>
 <div class="page-header">
   <div class="container">
     <h1>My Account</h1>
@@ -25,6 +26,8 @@
                 class="ri-shopping-bag-line"></i> Orders</a></li>
           <li><a href="#" onclick="showTab('wishlist',this);return false"><i class="ri-heart-line"></i> Wishlist</a>
           </li>
+          <li><a href="#" onclick="showTab('addresses',this);return false"><i class="ri-map-pin-line"></i> Addresses</a>
+          </li>
           <li><a href="#" onclick="showTab('profile',this);return false"><i class="ri-user-line"></i> Profile</a></li>
           <li><a href="#" onclick="showTab('settings',this);return false"><i class="ri-settings-3-line"></i>
               Settings</a></li>
@@ -42,8 +45,7 @@
             <div><strong>{{ order.order_number }}</strong><span> — {{ order.created_at|date:"M d, Y" }}</span></div>
             <span class="order-status {{ order.status }}">{{ order.get_status_display }}</span>
           </div>
-          <p style="font-size:.82rem;color:var(--text-secondary)">{% for item in order.items.all %}{{ item.product_name
-            }} x {{ item.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+          <p style="font-size:.82rem;color:var(--text-secondary)">{% for item in order.items.all %}{{ item.product_name }} x {{ item.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem">
             <p style="font-size:.9rem;font-weight:600;color:var(--accent)">₹{{ order.total }}</p>
             <a href="{% url 'order_detail_page' order.order_number %}" style="font-size:.8rem;color:var(--accent)">View
@@ -63,12 +65,135 @@
   </div>
 </section>
 
+<!-- Address Modal -->
+<div id="addressModal"
+  style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center">
+  <div
+    style="background:var(--card-bg);border-radius:16px;padding:2rem;width:90%;max-width:500px;max-height:85vh;overflow-y:auto;position:relative">
+    <button onclick="closeAddrModal()"
+      style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text-primary);font-size:1.3rem;cursor:pointer"><i
+        class="ri-close-line"></i></button>
+    <h3 id="addrModalTitle" style="margin-bottom:1.2rem;font-size:1.1rem">Add New Address</h3>
+    <input type="hidden" id="addrEditId">
+    <div style="margin-bottom:1rem">
+      <label style="display:block;font-size:.82rem;color:var(--text-secondary);margin-bottom:.3rem">Label</label>
+      <div style="display:flex;gap:.5rem" id="labelBtns">
+        <button type="button" class="addr-label-btn active" data-val="home" onclick="pickLabel('home',this)"
+          style="padding:.4rem .9rem;border-radius:20px;border:1px solid var(--border);background:var(--accent);color:#000;font-size:.8rem;cursor:pointer;font-weight:600"><i
+            class="ri-home-4-line"></i> Home</button>
+        <button type="button" class="addr-label-btn" data-val="work" onclick="pickLabel('work',this)"
+          style="padding:.4rem .9rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-primary);font-size:.8rem;cursor:pointer"><i
+            class="ri-building-line"></i> Work</button>
+        <button type="button" class="addr-label-btn" data-val="other" onclick="pickLabel('other',this)"
+          style="padding:.4rem .9rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-primary);font-size:.8rem;cursor:pointer"><i
+            class="ri-map-pin-line"></i> Other</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+      <div class="form-group"><label>Full Name</label><input type="text" id="addrName" placeholder="John Doe"
+          style="width:100%;padding:.6rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.88rem">
+      </div>
+      <div class="form-group"><label>Phone</label><input type="text" id="addrPhone" placeholder="+91 XXXXX XXXXX"
+          style="width:100%;padding:.6rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.88rem">
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:.8rem"><label>Address</label><textarea id="addrLine" rows="2"
+        placeholder="House No, Street, Landmark..."
+        style="width:100%;padding:.6rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.88rem;resize:vertical;font-family:inherit"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-top:.8rem">
+      <div class="form-group"><label>City</label><input type="text" id="addrCity" placeholder="City"
+          style="width:100%;padding:.6rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.88rem">
+      </div>
+      <div class="form-group"><label>State</label><input type="text" id="addrState" placeholder="State"
+          style="width:100%;padding:.6rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.88rem">
+      </div>
+      <div class="form-group"><label>Pincode</label><input type="text" id="addrPincode" placeholder="XXXXXX"
+          style="width:100%;padding:.6rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-size:.88rem">
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:.5rem;margin-top:.8rem;font-size:.85rem;cursor:pointer">
+      <input type="checkbox" id="addrDefault"> Set as default address
+    </label>
+    <div id="addrError" style="display:none;margin-top:.6rem;color:var(--danger);font-size:.82rem"></div>
+    <button class="btn btn-primary" onclick="saveAddress()" style="width:100%;margin-top:1rem"><i
+        class="ri-save-line"></i> Save Address</button>
+  </div>
+</div>
+
 <script>
   const userData = {
     firstName: '{{ user.first_name|escapejs }}',
     lastName: '{{ user.last_name|escapejs }}',
     email: '{{ user.email|escapejs }}',
   };
+
+  function getCsrf() { return document.querySelector('[name=csrfmiddlewaretoken]').value; }
+
+  let addrLabel = 'home';
+  function pickLabel(val, btn) {
+    addrLabel = val;
+    document.querySelectorAll('.addr-label-btn').forEach(b => {
+      b.style.background = 'transparent'; b.style.color = 'var(--text-primary)';
+    });
+    btn.style.background = 'var(--accent)'; btn.style.color = '#000';
+  }
+
+  function openAddrModal(addr) {
+    document.getElementById('addrModalTitle').textContent = addr ? 'Edit Address' : 'Add New Address';
+    document.getElementById('addrEditId').value = addr ? addr.id : '';
+    document.getElementById('addrName').value = addr ? addr.full_name : '';
+    document.getElementById('addrPhone').value = addr ? addr.phone : '';
+    document.getElementById('addrLine').value = addr ? addr.address_line : '';
+    document.getElementById('addrCity').value = addr ? addr.city : '';
+    document.getElementById('addrState').value = addr ? addr.state : '';
+    document.getElementById('addrPincode').value = addr ? addr.pincode : '';
+    document.getElementById('addrDefault').checked = addr ? addr.is_default : false;
+    document.getElementById('addrError').style.display = 'none';
+    addrLabel = addr ? addr.label : 'home';
+    document.querySelectorAll('.addr-label-btn').forEach(b => {
+      if (b.dataset.val === addrLabel) { b.style.background = 'var(--accent)'; b.style.color = '#000'; }
+      else { b.style.background = 'transparent'; b.style.color = 'var(--text-primary)'; }
+    });
+    document.getElementById('addressModal').style.display = 'flex';
+  }
+  function closeAddrModal() { document.getElementById('addressModal').style.display = 'none'; }
+
+  function saveAddress() {
+    const body = {
+      label: addrLabel,
+      full_name: document.getElementById('addrName').value,
+      phone: document.getElementById('addrPhone').value,
+      address_line: document.getElementById('addrLine').value,
+      city: document.getElementById('addrCity').value,
+      state: document.getElementById('addrState').value,
+      pincode: document.getElementById('addrPincode').value,
+      is_default: document.getElementById('addrDefault').checked,
+    };
+    const editId = document.getElementById('addrEditId').value;
+    if (editId) body.id = parseInt(editId);
+    fetch('/api/address/save/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify(body)
+    }).then(r => r.json()).then(data => {
+      if (data.success) { closeAddrModal(); showTab('addresses'); }
+      else { const e = document.getElementById('addrError'); e.textContent = data.error; e.style.display = 'block'; }
+    });
+  }
+
+  function deleteAddress(id) {
+    if (!confirm('Delete this address?')) return;
+    fetch('/api/address/' + id + '/delete/', {
+      method: 'POST', headers: { 'X-CSRFToken': getCsrf() }
+    }).then(r => r.json()).then(data => { if (data.success) showTab('addresses'); });
+  }
+
+  function setDefaultAddr(id) {
+    fetch('/api/address/' + id + '/default/', {
+      method: 'POST', headers: { 'X-CSRFToken': getCsrf() }
+    }).then(r => r.json()).then(data => { if (data.success) showTab('addresses'); });
+  }
 
   function showTab(tab, link) {
     const el = document.getElementById('accountTab');
@@ -96,6 +221,37 @@
       html += '<div style="text-align:center;padding:3rem 0;color:var(--text-secondary)"><i class="ri-heart-line" style="font-size:3rem;opacity:.3"></i><p style="margin-top:1rem">Your wishlist is empty. <a href="/shop/" style="color:var(--accent)">Explore products</a></p></div>';
       {% endif %}
       el.innerHTML = html;
+    } else if (tab === 'addresses') {
+      fetch('/api/addresses/').then(r => r.json()).then(data => {
+        let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem"><h3 style="margin:0">Saved Addresses</h3><button class="btn btn-primary" onclick="openAddrModal(null)" style="font-size:.82rem;padding:.5rem 1rem"><i class="ri-add-line"></i> Add Address</button></div>';
+        if (data.addresses && data.addresses.length) {
+          html += '<div style="display:grid;gap:1rem">';
+          const icons = { home: 'ri-home-4-line', work: 'ri-building-line', other: 'ri-map-pin-line' };
+          data.addresses.forEach(a => {
+            html += `<div style="padding:1.2rem;background:var(--card-bg);border:1px solid ${a.is_default ? 'var(--accent)' : 'var(--border)'};border-radius:12px;position:relative">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+                  <span style="background:${a.is_default ? 'var(--accent)' : 'var(--border)'};color:${a.is_default ? '#000' : 'var(--text-primary)'};padding:.2rem .7rem;border-radius:20px;font-size:.75rem;font-weight:600;display:inline-flex;align-items:center;gap:.3rem"><i class="${icons[a.label] || 'ri-map-pin-line'}"></i>${a.label.charAt(0).toUpperCase() + a.label.slice(1)}</span>
+                  ${a.is_default ? '<span style="font-size:.7rem;color:var(--accent);font-weight:600">DEFAULT</span>' : ''}
+                </div>
+                <div style="display:flex;gap:.4rem">
+                  <button onclick='openAddrModal(${JSON.stringify(a)})' title="Edit" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1rem"><i class="ri-pencil-line"></i></button>
+                  <button onclick="deleteAddress(${a.id})" title="Delete" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem"><i class="ri-delete-bin-line"></i></button>
+                </div>
+              </div>
+              <p style="font-weight:600;margin:0 0 .2rem">${a.full_name}</p>
+              <p style="font-size:.85rem;color:var(--text-secondary);margin:0 0 .15rem">${a.address_line}</p>
+              <p style="font-size:.85rem;color:var(--text-secondary);margin:0">${a.city}, ${a.state} — ${a.pincode}</p>
+              <p style="font-size:.82rem;color:var(--text-secondary);margin:.3rem 0 0"><i class="ri-phone-line"></i> ${a.phone}</p>
+              ${!a.is_default ? `<button onclick="setDefaultAddr(${a.id})" style="margin-top:.6rem;font-size:.75rem;padding:.3rem .8rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer">Set as Default</button>` : ''}
+            </div>`;
+          });
+          html += '</div>';
+        } else {
+          html += '<div style="text-align:center;padding:3rem 0;color:var(--text-secondary)"><i class="ri-map-pin-line" style="font-size:3rem;opacity:.3"></i><p style="margin-top:1rem">No saved addresses. Add one to speed up checkout!</p></div>';
+        }
+        el.innerHTML = html;
+      });
     } else if (tab === 'profile') {
       el.innerHTML = `<h3 style="margin-bottom:1.5rem">Profile Settings</h3>
       <div id="profileMsg"></div>
@@ -116,59 +272,52 @@
   }
 
   function saveProfile() {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     fetch('/api/profile/update/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
       body: JSON.stringify({
         first_name: document.getElementById('profFirst').value,
         last_name: document.getElementById('profLast').value,
         email: document.getElementById('profEmail').value,
       })
-    })
-      .then(r => r.json())
-      .then(data => {
-        const msg = document.getElementById('profileMsg');
-        if (data.success) {
-          msg.innerHTML = '<div class="auth-error" style="background:rgba(0,200,100,.1);color:#0c6">✓ Profile updated successfully!</div>';
-          userData.firstName = document.getElementById('profFirst').value;
-          userData.lastName = document.getElementById('profLast').value;
-          userData.email = document.getElementById('profEmail').value;
-          // Update sidebar & navbar
-          const fullName = (userData.firstName + ' ' + userData.lastName).trim();
-          document.querySelector('.user-info h4').textContent = fullName || userData.email;
-          const navName = document.querySelector('.nav-user-name');
-          if (navName) navName.textContent = fullName || userData.email;
-          document.querySelector('.user-avatar').textContent = userData.firstName.charAt(0).toUpperCase() || 'U';
-        } else {
-          msg.innerHTML = '<div class="auth-error"><i class="ri-error-warning-line"></i> ' + data.error + '</div>';
-        }
-      });
+    }).then(r => r.json()).then(data => {
+      const msg = document.getElementById('profileMsg');
+      if (data.success) {
+        msg.innerHTML = '<div class="auth-error" style="background:rgba(0,200,100,.1);color:#0c6">✓ Profile updated!</div>';
+        userData.firstName = document.getElementById('profFirst').value;
+        userData.lastName = document.getElementById('profLast').value;
+        userData.email = document.getElementById('profEmail').value;
+        const fullName = (userData.firstName + ' ' + userData.lastName).trim();
+        document.querySelector('.user-info h4').textContent = fullName || userData.email;
+        const navName = document.querySelector('.nav-user-name');
+        if (navName) navName.textContent = fullName || userData.email;
+        document.querySelector('.user-avatar').textContent = userData.firstName.charAt(0).toUpperCase() || 'U';
+      } else {
+        msg.innerHTML = '<div class="auth-error"><i class="ri-error-warning-line"></i> ' + data.error + '</div>';
+      }
+    });
   }
 
   function changePassword() {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     fetch('/api/password/change/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
       body: JSON.stringify({
         current_password: document.getElementById('pwCurrent').value,
         new_password: document.getElementById('pwNew').value,
         confirm_password: document.getElementById('pwConfirm').value,
       })
-    })
-      .then(r => r.json())
-      .then(data => {
-        const msg = document.getElementById('pwMsg');
-        if (data.success) {
-          msg.innerHTML = '<div class="auth-error" style="background:rgba(0,200,100,.1);color:#0c6">✓ Password changed successfully!</div>';
-          document.getElementById('pwCurrent').value = '';
-          document.getElementById('pwNew').value = '';
-          document.getElementById('pwConfirm').value = '';
-        } else {
-          msg.innerHTML = '<div class="auth-error"><i class="ri-error-warning-line"></i> ' + data.error + '</div>';
-        }
-      });
+    }).then(r => r.json()).then(data => {
+      const msg = document.getElementById('pwMsg');
+      if (data.success) {
+        msg.innerHTML = '<div class="auth-error" style="background:rgba(0,200,100,.1);color:#0c6">✓ Password changed!</div>';
+        document.getElementById('pwCurrent').value = '';
+        document.getElementById('pwNew').value = '';
+        document.getElementById('pwConfirm').value = '';
+      } else {
+        msg.innerHTML = '<div class="auth-error"><i class="ri-error-warning-line"></i> ' + data.error + '</div>';
+      }
+    });
   }
 </script>
 {% endblock %}

@@ -34,8 +34,7 @@
                                 <div class="cart-item-info">
                                     <img src="{{ item.product.image }}" alt="{{ item.product.name }}">
                                     <div>
-                                        <h4><a href="{% url 'product_detail' item.product.slug %}">{{ item.product.name
-                                                }}</a></h4>
+                                        <h4><a href="{% url 'product_detail' item.product.slug %}">{{ item.product.name }}</a></h4>
                                         <span>Size: {{ item.size }} &middot; Color: <span
                                                 style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ item.color }};vertical-align:middle"></span></span>
                                     </div>
